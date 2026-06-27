@@ -3,8 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>مكتب الاستشارات القانونية</title>
+  <title data-en="Legal Consultations Office">مكتب الاستشارات القانونية</title>
   <link rel="stylesheet" href="/css/style.css">
+  <script>
+    (function(){var l=localStorage.getItem('lang')||'ar';document.documentElement.dir=l==='en'?'ltr':'rtl';document.documentElement.lang=l==='en'?'en':'ar';})();
+  </script>
 </head>
 <body>
 
@@ -15,9 +18,10 @@
     <div class="top-bar-right">
       <a href="tel:+971500000000">📞 +971 50 000 0000</a>
       <a href="mailto:info@office.ae">✉️ info@office.ae</a>
-      <span>🕐 الأحد – الخميس: 9 صباحاً – 6 مساءً</span>
+      <span data-en="🕐 Sun–Thu: 9AM – 6PM">🕐 الأحد – الخميس: 9 صباحاً – 6 مساءً</span>
     </div>
     <div class="top-bar-left">
+      <button id="langToggle" class="lang-btn" onclick="toggleLang()">🌐 English</button>
       <a href="#" title="واتساب">𝕎</a>
       <a href="#" title="لينكدإن">in</a>
       <a href="#" title="تويتر">𝕏</a>
@@ -27,83 +31,74 @@
   <!-- Navbar -->
   <nav class="navbar">
     <div class="navbar-brand">
-      <!-- Logo SVG -->
       <div class="logo-wrap">
         <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
           <circle cx="26" cy="26" r="26" fill="#C9A84C" opacity="0.12"/>
           <circle cx="26" cy="26" r="22" fill="none" stroke="#C9A84C" stroke-width="1.2" opacity="0.4"/>
-          <!-- Scales of Justice -->
           <line x1="26" y1="11" x2="26" y2="41" stroke="#C9A84C" stroke-width="1.8" stroke-linecap="round"/>
           <line x1="14" y1="18" x2="38" y2="18" stroke="#C9A84C" stroke-width="1.8" stroke-linecap="round"/>
-          <!-- Left pan -->
           <path d="M14 18 L10 26 Q14 29 18 26 Z" fill="#C9A84C" opacity="0.85"/>
-          <!-- Right pan -->
           <path d="M38 18 L34 26 Q38 29 42 26 Z" fill="#C9A84C" opacity="0.85"/>
-          <!-- Base -->
           <line x1="20" y1="41" x2="32" y2="41" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"/>
-          <!-- Crown top -->
           <circle cx="26" cy="11" r="2" fill="#C9A84C"/>
         </svg>
       </div>
-
       <div class="brand-text">
-        <span class="firm-name">مكتب الاستشارات القانونية</span>
-        <span class="firm-sub">للمحاماة والاستشارات القانونية — دبي، الإمارات</span>
+        <span class="firm-name" data-en="Legal Consultations Office">مكتب الاستشارات القانونية</span>
+        <span class="firm-sub" data-en="Law &amp; Legal Consultations — Dubai, UAE">للمحاماة والاستشارات القانونية — دبي، الإمارات</span>
       </div>
-
       <div class="brand-divider"></div>
       <div class="brand-cert">
         <span class="cert-icon">🇦🇪</span>
-        <span class="cert-text">مرخّص</span>
+        <span class="cert-text" data-en="Licensed">مرخّص</span>
       </div>
     </div>
 
     <ul class="navbar-nav">
-      <li><a href="#services">⚖️ خدماتنا</a></li>
-      <li><a href="#how">📋 كيف يعمل</a></li>
-      <li><a href="#about">🏛️ عن المكتب</a></li>
-      <li><a href="/booking.html" class="btn-book-nav">📅 احجز استشارة</a></li>
+      <li><a href="#services" data-en="⚖️ Services">⚖️ خدماتنا</a></li>
+      <li><a href="#how" data-en="📋 How It Works">📋 كيف يعمل</a></li>
+      <li><a href="#about" data-en="🏛️ About Us">🏛️ عن المكتب</a></li>
+      <li><a href="/booking.html" class="btn-book-nav" data-en="📅 Book Now">📅 احجز استشارة</a></li>
     </ul>
   </nav>
 </div>
 
 <!-- Hero -->
 <section class="hero">
-  <!-- Decorative elements -->
   <div class="hero-decor hero-decor-1"></div>
   <div class="hero-decor hero-decor-2"></div>
   <div class="hero-decor hero-decor-3"></div>
 
   <div class="hero-inner">
-    <!-- Left: Content -->
+    <!-- Content -->
     <div class="hero-content">
       <div class="hero-badge">
         <span class="badge-dot"></span>
-        <span>مكتب معتمد لدى وزارة العدل الإماراتية</span>
+        <span data-en="Office licensed with UAE Ministry of Justice">مكتب معتمد لدى وزارة العدل الإماراتية</span>
         <span class="badge-flag">🇦🇪</span>
       </div>
 
-      <h1>
+      <h1 data-en="Justice is a right<br>We're here <span>to achieve it</span>">
         العدالة حقٌّ<br>نحن هنا <span>لنُحقِّقها</span>
       </h1>
 
-      <p>
+      <p data-en="Specialized legal consultations online with certified lawyers in the UAE — complete confidentiality, unmatched quality, from the comfort of your home or office.">
         استشارات قانونية متخصصة عبر الإنترنت مع محامين معتمدين في دولة الإمارات —
         بسرية تامة، وجودة لا تُضاهى، من راحة منزلك أو مكتبك.
       </p>
 
       <div class="hero-features">
-        <div class="hero-feat"><span class="feat-icon">🔒</span> سرية تامة مضمونة</div>
-        <div class="hero-feat"><span class="feat-icon">⚡</span> استجابة فورية</div>
-        <div class="hero-feat"><span class="feat-icon">🎯</span> محامون متخصصون</div>
+        <div class="hero-feat"><span class="feat-icon">🔒</span> <span data-en="Full Confidentiality">سرية تامة مضمونة</span></div>
+        <div class="hero-feat"><span class="feat-icon">⚡</span> <span data-en="Instant Response">استجابة فورية</span></div>
+        <div class="hero-feat"><span class="feat-icon">🎯</span> <span data-en="Expert Lawyers">محامون متخصصون</span></div>
       </div>
 
       <div class="hero-actions">
         <a href="/booking.html" class="btn-primary btn-hero">
-          <span>📅</span> احجز استشارتك الآن
+          <span>📅</span> <span data-en="Book Your Consultation">احجز استشارتك الآن</span>
         </a>
         <a href="#how" class="btn-outline">
-          <span>▶</span> كيف يعمل؟
+          <span>▶</span> <span data-en="How it works?">كيف يعمل؟</span>
         </a>
       </div>
 
@@ -114,11 +109,11 @@
           <div class="avatar">ف</div>
           <div class="avatar">+</div>
         </div>
-        <p>انضم إلى أكثر من <strong>500 عميل</strong> وثقوا بخدماتنا</p>
+        <p data-en="Join over <strong>500 clients</strong> who trusted our services">انضم إلى أكثر من <strong>500 عميل</strong> وثقوا بخدماتنا</p>
       </div>
     </div>
 
-    <!-- Right: Visual Card -->
+    <!-- Visual Card -->
     <div class="hero-visual">
       <div class="hero-card">
         <div class="hero-card-top">
@@ -134,40 +129,40 @@
             </svg>
           </div>
           <div>
-            <div class="hc-title">استشارة قانونية</div>
-            <div class="hc-sub">أونلاين — صوت وصورة</div>
+            <div class="hc-title" data-en="Legal Consultation">استشارة قانونية</div>
+            <div class="hc-sub" data-en="Online — Audio &amp; Video">أونلاين — صوت وصورة</div>
           </div>
         </div>
         <div class="hc-divider"></div>
         <div class="hc-stats-grid">
           <div class="hc-stat">
             <span class="hc-num">+500</span>
-            <span class="hc-lbl">عميل راضٍ</span>
+            <span class="hc-lbl" data-en="Satisfied Client">عميل راضٍ</span>
           </div>
           <div class="hc-stat">
             <span class="hc-num">15+</span>
-            <span class="hc-lbl">سنة خبرة</span>
+            <span class="hc-lbl" data-en="Years Experience">سنة خبرة</span>
           </div>
           <div class="hc-stat">
             <span class="hc-num">98%</span>
-            <span class="hc-lbl">نسبة النجاح</span>
+            <span class="hc-lbl" data-en="Success Rate">نسبة النجاح</span>
           </div>
           <div class="hc-stat">
             <span class="hc-num">24/7</span>
-            <span class="hc-lbl">دعم متواصل</span>
+            <span class="hc-lbl" data-en="Support">دعم متواصل</span>
           </div>
         </div>
         <div class="hc-divider"></div>
         <div class="hc-areas">
-          <span class="hc-tag">قانون الأسرة</span>
-          <span class="hc-tag">قضايا جزائية</span>
-          <span class="hc-tag">عقارات</span>
-          <span class="hc-tag">قانون تجاري</span>
-          <span class="hc-tag">قانون العمل</span>
+          <span class="hc-tag" data-en="Family Law">قانون الأسرة</span>
+          <span class="hc-tag" data-en="Criminal Cases">قضايا جزائية</span>
+          <span class="hc-tag" data-en="Real Estate">عقارات</span>
+          <span class="hc-tag" data-en="Commercial Law">قانون تجاري</span>
+          <span class="hc-tag" data-en="Labor Law">قانون العمل</span>
         </div>
-        <a href="/booking.html" class="hc-cta">احجز الآن ←</a>
+        <a href="/booking.html" class="hc-cta" data-en="Book Now →">احجز الآن ←</a>
         <div class="hc-badge">
-          <span>🔒</span> جلسة مشفرة وآمنة بالكامل
+          <span>🔒</span> <span data-en="Fully encrypted &amp; secure session">جلسة مشفرة وآمنة بالكامل</span>
         </div>
       </div>
     </div>
@@ -177,41 +172,41 @@
 <!-- Services -->
 <section class="section section-alt" id="services">
   <div class="section-header">
-    <div class="section-tag">خدماتنا القانونية</div>
-    <h2>تخصصات المكتب</h2>
-    <p>نقدم مجموعة شاملة من الخدمات القانونية المتخصصة لحماية حقوقك في الإمارات</p>
+    <div class="section-tag" data-en="Our Legal Services">خدماتنا القانونية</div>
+    <h2 data-en="Office Specializations">تخصصات المكتب</h2>
+    <p data-en="We offer a comprehensive range of specialized legal services to protect your rights in the UAE">نقدم مجموعة شاملة من الخدمات القانونية المتخصصة لحماية حقوقك في الإمارات</p>
     <div class="divider"></div>
   </div>
   <div class="services-grid">
     <div class="service-card">
       <div class="service-icon">🏢</div>
-      <h3>قانون الشركات والأعمال</h3>
-      <p>تأسيس الشركات، العقود التجارية، النزاعات التجارية، والامتثال للوائح التجارية الإماراتية.</p>
+      <h3 data-en="Corporate & Business Law">قانون الشركات والأعمال</h3>
+      <p data-en="Company formation, commercial contracts, business disputes, and UAE regulatory compliance.">تأسيس الشركات، العقود التجارية، النزاعات التجارية، والامتثال للوائح التجارية الإماراتية.</p>
     </div>
     <div class="service-card">
       <div class="service-icon">👨‍👩‍👧</div>
-      <h3>قانون الأسرة والأحوال الشخصية</h3>
-      <p>الطلاق، الحضانة، النفقة، الميراث والوصايا وفق أحكام الشريعة الإسلامية والقانون الإماراتي.</p>
+      <h3 data-en="Family & Personal Status Law">قانون الأسرة والأحوال الشخصية</h3>
+      <p data-en="Divorce, custody, alimony, inheritance and wills under Islamic law and UAE legislation.">الطلاق، الحضانة، النفقة، الميراث والوصايا وفق أحكام الشريعة الإسلامية والقانون الإماراتي.</p>
     </div>
     <div class="service-card">
       <div class="service-icon">🏠</div>
-      <h3>قانون العقارات</h3>
-      <p>عقود البيع والإيجار، تسوية النزاعات العقارية، وحقوق الملكية في الإمارات.</p>
+      <h3 data-en="Real Estate Law">قانون العقارات</h3>
+      <p data-en="Sale and lease contracts, property dispute resolution, and ownership rights in the UAE.">عقود البيع والإيجار، تسوية النزاعات العقارية، وحقوق الملكية في الإمارات.</p>
     </div>
     <div class="service-card">
       <div class="service-icon">⚖️</div>
-      <h3>القضايا الجزائية والمدنية</h3>
-      <p>الدفاع في القضايا الجزائية، ورفع الدعاوى المدنية أمام المحاكم الإماراتية بكافة درجاتها.</p>
+      <h3 data-en="Criminal & Civil Cases">القضايا الجزائية والمدنية</h3>
+      <p data-en="Criminal defense and civil litigation before UAE courts at all levels.">الدفاع في القضايا الجزائية، ورفع الدعاوى المدنية أمام المحاكم الإماراتية بكافة درجاتها.</p>
     </div>
     <div class="service-card">
       <div class="service-icon">💼</div>
-      <h3>قانون العمل والتوظيف</h3>
-      <p>عقود العمل، فصل الموظفين، مكافأة نهاية الخدمة، والنزاعات العمالية.</p>
+      <h3 data-en="Labor & Employment Law">قانون العمل والتوظيف</h3>
+      <p data-en="Employment contracts, termination, end-of-service benefits, and labor disputes.">عقود العمل، فصل الموظفين، مكافأة نهاية الخدمة، والنزاعات العمالية.</p>
     </div>
     <div class="service-card">
       <div class="service-icon">🌐</div>
-      <h3>القانون الدولي الخاص</h3>
-      <p>العقود الدولية، تنازع القوانين، وتنفيذ الأحكام الأجنبية في الإمارات.</p>
+      <h3 data-en="Private International Law">القانون الدولي الخاص</h3>
+      <p data-en="International contracts, conflict of laws, and enforcement of foreign judgments in the UAE.">العقود الدولية، تنازع القوانين، وتنفيذ الأحكام الأجنبية في الإمارات.</p>
     </div>
   </div>
 </section>
@@ -219,26 +214,26 @@
 <!-- How it works -->
 <section class="section" id="how">
   <div class="section-header">
-    <div class="section-tag">كيف يعمل</div>
-    <h2>3 خطوات بسيطة للحصول على استشارتك</h2>
-    <p>عملية سهلة وسريعة تضمن لك الحصول على استشارة قانونية متخصصة</p>
+    <div class="section-tag" data-en="How It Works">كيف يعمل</div>
+    <h2 data-en="3 Simple Steps to Get Your Consultation">3 خطوات بسيطة للحصول على استشارتك</h2>
+    <p data-en="An easy and fast process that guarantees you a specialized legal consultation">عملية سهلة وسريعة تضمن لك الحصول على استشارة قانونية متخصصة</p>
     <div class="divider"></div>
   </div>
   <div class="steps-grid">
     <div class="step-card">
       <div class="step-number">١</div>
-      <h3>سجل بياناتك</h3>
-      <p>أدخل اسمك ورقم هاتفك وبريدك الإلكتروني في نموذج الحجز البسيط.</p>
+      <h3 data-en="Enter Your Details">سجل بياناتك</h3>
+      <p data-en="Enter your name, phone number, and email in the simple booking form.">أدخل اسمك ورقم هاتفك وبريدك الإلكتروني في نموذج الحجز البسيط.</p>
     </div>
     <div class="step-card">
       <div class="step-number">٢</div>
-      <h3>اختر الموعد المناسب</h3>
-      <p>تصفح المواعيد المتاحة واختر اليوم والوقت الذي يناسبك، ونوع الاستشارة (صوت أو صوت وصورة).</p>
+      <h3 data-en="Choose Your Appointment">اختر الموعد المناسب</h3>
+      <p data-en="Browse available slots and choose the day, time, and consultation type (audio or audio+video) that suits you.">تصفح المواعيد المتاحة واختر اليوم والوقت الذي يناسبك، ونوع الاستشارة (صوت أو صوت وصورة).</p>
     </div>
     <div class="step-card">
       <div class="step-number">٣</div>
-      <h3>ابدأ استشارتك</h3>
-      <p>في الموعد المحدد، ادخل غرفة الاستشارة الآمنة وتحدث مع المحامي مباشرة عبر الإنترنت.</p>
+      <h3 data-en="Start Your Consultation">ابدأ استشارتك</h3>
+      <p data-en="At the scheduled time, enter the secure consultation room and speak directly with the lawyer online.">في الموعد المحدد، ادخل غرفة الاستشارة الآمنة وتحدث مع المحامي مباشرة عبر الإنترنت.</p>
     </div>
   </div>
 </section>
@@ -246,40 +241,40 @@
 <!-- About -->
 <section class="section section-alt" id="about">
   <div class="section-header">
-    <div class="section-tag">عن المكتب</div>
-    <h2>لماذا تختار مكتبنا؟</h2>
+    <div class="section-tag" data-en="About Us">عن المكتب</div>
+    <h2 data-en="Why Choose Our Office?">لماذا تختار مكتبنا؟</h2>
     <div class="divider"></div>
   </div>
   <div class="services-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px,1fr))">
     <div class="service-card" style="text-align:center">
       <div class="service-icon" style="margin:0 auto 16px">🔒</div>
-      <h3>سرية تامة</h3>
-      <p>جميع استشاراتك تتم في بيئة مشفرة وآمنة بالكامل.</p>
+      <h3 data-en="Full Confidentiality">سرية تامة</h3>
+      <p data-en="All your consultations take place in a fully encrypted and secure environment.">جميع استشاراتك تتم في بيئة مشفرة وآمنة بالكامل.</p>
     </div>
     <div class="service-card" style="text-align:center">
       <div class="service-icon" style="margin:0 auto 16px">⚡</div>
-      <h3>سرعة في الاستجابة</h3>
-      <p>نضمن الرد على استفساراتك خلال 24 ساعة كحد أقصى.</p>
+      <h3 data-en="Fast Response">سرعة في الاستجابة</h3>
+      <p data-en="We guarantee a response to your inquiries within 24 hours maximum.">نضمن الرد على استفساراتك خلال 24 ساعة كحد أقصى.</p>
     </div>
     <div class="service-card" style="text-align:center">
       <div class="service-icon" style="margin:0 auto 16px">🎯</div>
-      <h3>تخصص دقيق</h3>
-      <p>فريق من المحامين المتخصصين في كل مجال من مجالات القانون.</p>
+      <h3 data-en="Deep Expertise">تخصص دقيق</h3>
+      <p data-en="A team of lawyers specialized in every field of law.">فريق من المحامين المتخصصين في كل مجال من مجالات القانون.</p>
     </div>
     <div class="service-card" style="text-align:center">
       <div class="service-icon" style="margin:0 auto 16px">💡</div>
-      <h3>حلول عملية</h3>
-      <p>نقدم حلولاً قانونية واقعية وفعالة مبنية على خبرة سنوات.</p>
+      <h3 data-en="Practical Solutions">حلول عملية</h3>
+      <p data-en="We provide real, effective legal solutions built on years of experience.">نقدم حلولاً قانونية واقعية وفعالة مبنية على خبرة سنوات.</p>
     </div>
   </div>
 </section>
 
 <!-- CTA -->
 <section class="cta-banner">
-  <h2>هل لديك قضية أو استفسار قانوني؟</h2>
-  <p>لا تتردد — احجز استشارتك الآن وتحدث مع محامٍ متخصص</p>
+  <h2 data-en="Have a legal case or question?">هل لديك قضية أو استفسار قانوني؟</h2>
+  <p data-en="Don't hesitate — book your consultation now and speak with a specialist lawyer">لا تتردد — احجز استشارتك الآن وتحدث مع محامٍ متخصص</p>
   <a href="/booking.html" class="btn-primary" style="margin:0 auto; display:inline-flex">
-    📅 احجز استشارتك المجانية الأولى
+    📅 <span data-en="Book Your Free First Consultation">احجز استشارتك المجانية الأولى</span>
   </a>
 </section>
 
@@ -289,33 +284,34 @@
     <div class="footer-col">
       <div class="footer-brand">
         <div class="logo-icon">⚖️</div>
-        <strong>مكتب الاستشارات القانونية</strong>
+        <strong data-en="Legal Consultations Office">مكتب الاستشارات القانونية</strong>
       </div>
-      <p>مكتب متخصص في تقديم الاستشارات القانونية المتميزة في دولة الإمارات العربية المتحدة. نؤمن بأن العدالة حق للجميع.</p>
+      <p data-en="A specialized office providing distinguished legal consultations in the UAE. We believe justice is a right for everyone.">مكتب متخصص في تقديم الاستشارات القانونية المتميزة في دولة الإمارات العربية المتحدة. نؤمن بأن العدالة حق للجميع.</p>
     </div>
     <div class="footer-col">
-      <h4>روابط سريعة</h4>
+      <h4 data-en="Quick Links">روابط سريعة</h4>
       <ul>
-        <li><a href="#services">خدماتنا</a></li>
-        <li><a href="#how">كيف يعمل</a></li>
-        <li><a href="/booking.html">احجز استشارة</a></li>
-        <li><a href="/admin.html">لوحة التحكم</a></li>
+        <li><a href="#services" data-en="Our Services">خدماتنا</a></li>
+        <li><a href="#how" data-en="How It Works">كيف يعمل</a></li>
+        <li><a href="/booking.html" data-en="Book Consultation">احجز استشارة</a></li>
+        <li><a href="/admin.html" data-en="Admin Panel">لوحة التحكم</a></li>
       </ul>
     </div>
     <div class="footer-col">
-      <h4>تواصل معنا</h4>
+      <h4 data-en="Contact Us">تواصل معنا</h4>
       <ul>
-        <li>📍 دبي، الإمارات العربية المتحدة</li>
+        <li data-en="📍 Dubai, United Arab Emirates">📍 دبي، الإمارات العربية المتحدة</li>
         <li>📞 <a href="tel:+971500000000">+971 50 000 0000</a></li>
         <li>📧 <a href="mailto:info@office.ae">info@office.ae</a></li>
-        <li>🕐 الأحد - الخميس: 9ص - 6م</li>
+        <li data-en="🕐 Sun–Thu: 9AM – 6PM">🕐 الأحد - الخميس: 9ص - 6م</li>
       </ul>
     </div>
   </div>
   <div class="footer-bottom">
-    <p>© 2026 مكتب الاستشارات القانونية — جميع الحقوق محفوظة</p>
+    <p data-en="© 2026 Legal Consultations Office — All Rights Reserved">© 2026 مكتب الاستشارات القانونية — جميع الحقوق محفوظة</p>
   </div>
 </footer>
 
+<script src="/js/lang.js"></script>
 </body>
 </html>

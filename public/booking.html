@@ -3,8 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>حجز استشارة — مكتب الاستشارات القانونية</title>
+  <title data-en="Book a Consultation — Legal Consultations Office">حجز استشارة — مكتب الاستشارات القانونية</title>
   <link rel="stylesheet" href="/css/style.css">
+  <script>
+    (function(){var l=localStorage.getItem('lang')||'ar';document.documentElement.dir=l==='en'?'ltr':'rtl';document.documentElement.lang=l==='en'?'en':'ar';})();
+  </script>
 </head>
 <body>
 
@@ -13,9 +16,10 @@
     <div class="top-bar-right">
       <a href="tel:+971500000000">📞 +971 50 000 0000</a>
       <a href="mailto:info@office.ae">✉️ info@office.ae</a>
-      <span>🕐 الأحد – الخميس: 9 صباحاً – 6 مساءً</span>
+      <span data-en="🕐 Sun–Thu: 9AM – 6PM">🕐 الأحد – الخميس: 9 صباحاً – 6 مساءً</span>
     </div>
     <div class="top-bar-left">
+      <button id="langToggle" class="lang-btn" onclick="toggleLang()">🌐 English</button>
       <a href="#" title="واتساب">𝕎</a>
       <a href="#" title="لينكدإن">in</a>
     </div>
@@ -35,26 +39,26 @@
         </svg>
       </div>
       <div class="brand-text">
-        <span class="firm-name">مكتب الاستشارات القانونية</span>
-        <span class="firm-sub">للمحاماة والاستشارات القانونية — دبي، الإمارات</span>
+        <span class="firm-name" data-en="Legal Consultations Office">مكتب الاستشارات القانونية</span>
+        <span class="firm-sub" data-en="Law &amp; Legal Consultations — Dubai, UAE">للمحاماة والاستشارات القانونية — دبي، الإمارات</span>
       </div>
       <div class="brand-divider"></div>
       <div class="brand-cert">
         <span class="cert-icon">🇦🇪</span>
-        <span class="cert-text">مرخّص</span>
+        <span class="cert-text" data-en="Licensed">مرخّص</span>
       </div>
     </div>
     <ul class="navbar-nav">
-      <li><a href="/">🏠 الرئيسية</a></li>
-      <li><a href="/#services">⚖️ خدماتنا</a></li>
-      <li><a href="/booking.html" class="btn-book-nav">📅 احجز الآن</a></li>
+      <li><a href="/" data-en="🏠 Home">🏠 الرئيسية</a></li>
+      <li><a href="/#services" data-en="⚖️ Services">⚖️ خدماتنا</a></li>
+      <li><a href="/booking.html" class="btn-book-nav" data-en="📅 Book Now">📅 احجز الآن</a></li>
     </ul>
   </nav>
 </div>
 
 <div class="page-header">
-  <h1>📅 احجز استشارتك القانونية</h1>
-  <p>أكمل الخطوات التالية لتأكيد موعد استشارتك عبر الإنترنت</p>
+  <h1 data-en="📅 Book Your Legal Consultation">📅 احجز استشارتك القانونية</h1>
+  <p data-en="Complete the steps below to confirm your online consultation appointment">أكمل الخطوات التالية لتأكيد موعد استشارتك عبر الإنترنت</p>
 </div>
 
 <div class="booking-container">
@@ -63,17 +67,17 @@
   <div class="booking-card" id="successScreen" style="display:none">
     <div class="success-screen">
       <div class="success-icon">✅</div>
-      <h2>تم الحجز بنجاح!</h2>
-      <p>سيتواصل معك فريقنا قبل الموعد بوقت كافٍ. احتفظ برقم الحجز للدخول إلى غرفة الاستشارة.</p>
+      <h2 data-en="Booking Confirmed!">تم الحجز بنجاح!</h2>
+      <p data-en="Our team will contact you before the appointment. Keep your booking number to enter the consultation room.">سيتواصل معك فريقنا قبل الموعد بوقت كافٍ. احتفظ برقم الحجز للدخول إلى غرفة الاستشارة.</p>
       <div class="appt-id-box">
-        <div class="label">رقم الحجز (احتفظ به)</div>
+        <div class="label" data-en="Booking Number (keep it)">رقم الحجز (احتفظ به)</div>
         <div class="id" id="successApptId">—</div>
       </div>
       <a id="joinBtn" href="#" class="btn-primary" style="margin:0 auto; display:inline-flex">
-        🎥 دخول غرفة الاستشارة
+        🎥 <span data-en="Enter Consultation Room">دخول غرفة الاستشارة</span>
       </a>
       <br><br>
-      <a href="/" style="color:var(--text-muted); font-size:14px">← العودة للرئيسية</a>
+      <a href="/" style="color:var(--text-muted); font-size:14px" data-en="← Back to Home">← العودة للرئيسية</a>
     </div>
   </div>
 
@@ -83,22 +87,22 @@
     <div class="booking-steps-bar">
       <div class="step-dot active" id="stepDot1">
         <div class="dot">١</div>
-        <span>بياناتك</span>
+        <span data-en="Your Info">بياناتك</span>
       </div>
       <div class="step-line" id="stepLine1"></div>
       <div class="step-dot" id="stepDot2">
         <div class="dot">٢</div>
-        <span>نوع الاستشارة</span>
+        <span data-en="Type">نوع الاستشارة</span>
       </div>
       <div class="step-line" id="stepLine2"></div>
       <div class="step-dot" id="stepDot3">
         <div class="dot">٣</div>
-        <span>الموعد</span>
+        <span data-en="Slot">الموعد</span>
       </div>
       <div class="step-line" id="stepLine3"></div>
       <div class="step-dot" id="stepDot4">
         <div class="dot">٤</div>
-        <span>التأكيد</span>
+        <span data-en="Confirm">التأكيد</span>
       </div>
     </div>
 
@@ -107,110 +111,116 @@
 
       <!-- Step 1: Personal Info -->
       <div class="step-content active" id="step1">
-        <h3>👤 بياناتك الشخصية</h3>
+        <h3 data-en="👤 Your Personal Details">👤 بياناتك الشخصية</h3>
         <div class="form-row">
           <div class="form-group">
-            <label>الاسم الكامل *</label>
-            <input type="text" id="clientName" placeholder="أحمد محمد العلي">
+            <label data-en="Full Name *">الاسم الكامل *</label>
+            <input type="text" id="clientName"
+              placeholder="أحمد محمد العلي"
+              data-en-placeholder="Ahmed Mohammed Al Ali">
           </div>
           <div class="form-group">
-            <label>رقم الهاتف *</label>
-            <input type="tel" id="clientPhone" placeholder="+971 50 000 0000">
+            <label data-en="Phone Number *">رقم الهاتف *</label>
+            <input type="tel" id="clientPhone" placeholder="+971 50 000 0000"
+              data-en-placeholder="+971 50 000 0000">
           </div>
         </div>
         <div class="form-group">
-          <label>البريد الإلكتروني *</label>
-          <input type="email" id="clientEmail" placeholder="example@email.com">
+          <label data-en="Email Address *">البريد الإلكتروني *</label>
+          <input type="email" id="clientEmail" placeholder="example@email.com"
+            data-en-placeholder="example@email.com">
         </div>
         <div class="form-group">
-          <label>موضوع الاستشارة (اختياري)</label>
-          <input type="text" id="clientSubject" placeholder="مثال: قضية عمالية، عقد تجاري...">
+          <label data-en="Consultation Topic (optional)">موضوع الاستشارة (اختياري)</label>
+          <input type="text" id="clientSubject"
+            placeholder="مثال: قضية عمالية، عقد تجاري..."
+            data-en-placeholder="e.g. Labor case, commercial contract...">
         </div>
         <div class="booking-footer">
           <div></div>
-          <button class="btn-next" onclick="goToStep(2)">التالي ←</button>
+          <button class="btn-next" onclick="goToStep(2)" data-en="Next →">التالي ←</button>
         </div>
       </div>
 
       <!-- Step 2: Consultation Type -->
       <div class="step-content" id="step2">
-        <h3>🎙️ اختر نوع الاستشارة</h3>
+        <h3 data-en="🎙️ Choose Consultation Type">🎙️ اختر نوع الاستشارة</h3>
         <div class="type-options">
           <div>
             <input type="radio" name="consultType" id="typeAudio" value="audio" class="type-option">
             <label for="typeAudio" class="type-label">
               <span class="type-icon">🎧</span>
-              <span class="type-name">صوت فقط</span>
-              <span class="type-desc">استشارة صوتية عبر الإنترنت بدون كاميرا</span>
+              <span class="type-name" data-en="Audio Only">صوت فقط</span>
+              <span class="type-desc" data-en="Online audio consultation without camera">استشارة صوتية عبر الإنترنت بدون كاميرا</span>
             </label>
           </div>
           <div>
             <input type="radio" name="consultType" id="typeVideo" value="video" class="type-option">
             <label for="typeVideo" class="type-label">
               <span class="type-icon">📹</span>
-              <span class="type-name">صوت وصورة</span>
-              <span class="type-desc">استشارة بالفيديو مع المحامي وجهاً لوجه</span>
+              <span class="type-name" data-en="Audio &amp; Video">صوت وصورة</span>
+              <span class="type-desc" data-en="Video consultation face-to-face with the lawyer">استشارة بالفيديو مع المحامي وجهاً لوجه</span>
             </label>
           </div>
         </div>
         <div class="booking-footer">
-          <button class="btn-back" onclick="goToStep(1)">→ السابق</button>
-          <button class="btn-next" onclick="goToStep(3)">التالي ←</button>
+          <button class="btn-back" onclick="goToStep(1)" data-en="→ Back">→ السابق</button>
+          <button class="btn-next" onclick="goToStep(3)" data-en="Next →">التالي ←</button>
         </div>
       </div>
 
       <!-- Step 3: Choose Slot -->
       <div class="step-content" id="step3">
-        <h3>📅 اختر الموعد المناسب</h3>
+        <h3 data-en="📅 Choose a Suitable Slot">📅 اختر الموعد المناسب</h3>
         <div id="slotsContainer">
           <div style="text-align:center; padding:40px; color:var(--text-muted)">
             <div style="font-size:32px; margin-bottom:12px">⏳</div>
-            جارٍ تحميل المواعيد المتاحة...
+            <span data-en="Loading available slots...">جارٍ تحميل المواعيد المتاحة...</span>
           </div>
         </div>
         <div class="booking-footer">
-          <button class="btn-back" onclick="goToStep(2)">→ السابق</button>
-          <button class="btn-next" onclick="goToStep(4)">التالي ←</button>
+          <button class="btn-back" onclick="goToStep(2)" data-en="→ Back">→ السابق</button>
+          <button class="btn-next" onclick="goToStep(4)" data-en="Next →">التالي ←</button>
         </div>
       </div>
 
       <!-- Step 4: Confirmation -->
       <div class="step-content" id="step4">
-        <h3>✅ مراجعة وتأكيد الحجز</h3>
+        <h3 data-en="✅ Review &amp; Confirm Booking">✅ مراجعة وتأكيد الحجز</h3>
         <div class="confirmation-box">
-          <h4>تفاصيل الحجز</h4>
+          <h4 data-en="Booking Details">تفاصيل الحجز</h4>
           <div class="confirm-row">
-            <span class="label">الاسم</span>
+            <span class="label" data-en="Name">الاسم</span>
             <span class="value" id="confName">—</span>
           </div>
           <div class="confirm-row">
-            <span class="label">الهاتف</span>
+            <span class="label" data-en="Phone">الهاتف</span>
             <span class="value" id="confPhone">—</span>
           </div>
           <div class="confirm-row">
-            <span class="label">البريد الإلكتروني</span>
+            <span class="label" data-en="Email">البريد الإلكتروني</span>
             <span class="value" id="confEmail">—</span>
           </div>
           <div class="confirm-row">
-            <span class="label">نوع الاستشارة</span>
+            <span class="label" data-en="Consultation Type">نوع الاستشارة</span>
             <span class="value" id="confType">—</span>
           </div>
           <div class="confirm-row">
-            <span class="label">التاريخ</span>
+            <span class="label" data-en="Date">التاريخ</span>
             <span class="value" id="confDate">—</span>
           </div>
           <div class="confirm-row">
-            <span class="label">الوقت</span>
+            <span class="label" data-en="Time">الوقت</span>
             <span class="value" id="confTime">—</span>
           </div>
         </div>
-        <p style="font-size:13px; color:var(--text-muted); margin-bottom:16px">
+        <p style="font-size:13px; color:var(--text-muted); margin-bottom:16px" data-en="🔒 Your data is fully protected and confidential. By clicking 'Confirm Booking' you agree to our terms of service.">
           🔒 بياناتك محمية وسرية تماماً. بالضغط على "تأكيد الحجز" تقر بموافقتك على شروط الخدمة.
         </p>
         <div class="booking-footer">
-          <button class="btn-back" onclick="goToStep(3)">→ السابق</button>
+          <button class="btn-back" onclick="goToStep(3)" data-en="→ Back">→ السابق</button>
           <button class="btn-submit" id="submitBtn" onclick="submitBooking()">
-            <span id="submitText">✅ تأكيد الحجز</span>
+            <span id="submitText" data-en="✅ Confirm Booking">✅ تأكيد الحجز</span>
           </button>
         </div>
       </div>
@@ -220,5 +230,6 @@
 </div>
 
 <script src="/js/booking.js"></script>
+<script src="/js/lang.js"></script>
 </body>
 </html>

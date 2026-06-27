@@ -21,10 +21,29 @@
 
 body {
   font-family: 'Cairo', sans-serif;
-  direction: rtl;
   background: var(--cream);
   color: var(--text-dark);
   line-height: 1.7;
+}
+
+/* ── Language Toggle Button ── */
+.lang-btn {
+  background: transparent;
+  border: 1px solid rgba(201,168,76,0.45);
+  color: var(--gold);
+  font-family: 'Cairo', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.3px;
+}
+.lang-btn:hover {
+  background: var(--gold);
+  color: #0D1B2F;
+  border-color: var(--gold);
 }
 
 a { text-decoration: none; color: inherit; }
