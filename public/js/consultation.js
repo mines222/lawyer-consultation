@@ -49,7 +49,7 @@ function startMeeting(appId, roomName, token, type) {
     SHOW_BRAND_WATERMARK: false,
     TOOLBAR_ALWAYS_VISIBLE: true,
     DEFAULT_REMOTE_DISPLAY_NAME: 'المشارك',
-    APP_NAME: 'مكتب أشرف لطفي للمحاماة',
+    APP_NAME: 'مكتب الاستشارات القانونية',
   };
 
   const api = new JitsiMeetExternalAPI(domain, {
@@ -76,7 +76,7 @@ function startMeeting(appId, roomName, token, type) {
     document.getElementById('waitingRoom').innerHTML = `
       <div style="font-size:64px">✅</div>
       <h2 style="color:white">انتهت الاستشارة</h2>
-      <p>شكراً لاستخدامك خدمات مكتب أشرف لطفي للمحاماة</p>
+      <p>شكراً لاستخدامك خدمات مكتب الاستشارات القانونية</p>
       <a href="/" class="btn-primary" style="margin-top:16px">العودة للرئيسية</a>
     `;
   });
