@@ -1,12 +1,13 @@
 {
   "version": 2,
-  "builds": [
-    { "src": "server.js", "use": "@vercel/node" },
-    { "src": "public/**", "use": "@vercel/static" }
-  ],
+  "builds": [{ "src": "server.js", "use": "@vercel/node" }],
   "routes": [
     { "src": "/api/(.*)", "dest": "server.js" },
-    { "src": "/(.+\\.(html|css|js|png|jpg|svg|ico|woff|woff2))", "dest": "public/$1" },
-    { "src": "/", "dest": "public/index.html" }
+    { "src": "/admin.html", "dest": "server.js" },
+    { "src": "/booking.html", "dest": "server.js" },
+    { "src": "/consultation.html", "dest": "server.js" },
+    { "src": "/css/(.*)", "dest": "server.js" },
+    { "src": "/js/(.*)", "dest": "server.js" },
+    { "src": "/", "dest": "server.js" }
   ]
 }

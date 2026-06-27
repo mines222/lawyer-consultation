@@ -9,7 +9,7 @@ const cors = require('cors');
 const app = express();
 app.use(express.json());
 app.use(cors());
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
 
 const APP_ID = process.env.JAAS_APP_ID || 'vpaas-magic-cookie-e20359dbbbbf4b4682a312800d35ba98';
 const KEY_ID = process.env.JAAS_KEY_ID || 'e23e13';
