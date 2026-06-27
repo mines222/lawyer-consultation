@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>غرفة الاستشارة — مكتب أشرف لطفي للمحاماة</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body style="margin:0; padding:0; background:#0D1B2F;">
+
+<div class="consultation-wrapper">
+
+  <!-- Header -->
+  <div class="consultation-header">
+    <div class="brand">
+      <span style="font-size:20px">⚖️</span>
+      مكتب أشرف لطفي — <span>غرفة الاستشارة القانونية</span>
+    </div>
+    <div class="consultation-status">
+      <div class="status-dot"></div>
+      <span id="statusText">جارٍ الاتصال...</span>
+    </div>
+  </div>
+
+  <!-- Waiting Room -->
+  <div class="waiting-room" id="waitingRoom">
+    <div class="spinner"></div>
+    <h2>جارٍ تجهيز غرفة الاستشارة...</h2>
+    <p id="waitingMsg">يرجى الانتظار بينما نتحقق من بيانات حجزك</p>
+    <div id="waitingInfo" style="color:rgba(255,255,255,0.5); font-size:13px; margin-top:8px"></div>
+  </div>
+
+  <!-- JaaS Container -->
+  <div class="jaas-container hidden" id="jaasContainer"></div>
+
+  <!-- Error Screen -->
+  <div class="waiting-room hidden" id="errorScreen">
+    <div style="font-size:64px">❌</div>
+    <h2 style="color:var(--danger)">تعذر الدخول</h2>
+    <p id="errorMsg">رقم الحجز غير صحيح أو انتهت صلاحية الرابط.</p>
+    <a href="/booking.html" class="btn-primary" style="margin-top:16px">احجز موعداً جديداً</a>
+  </div>
+
+</div>
+
+<script src="/js/consultation.js"></script>
+</body>
+</html>

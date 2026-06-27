@@ -1,0 +1,15 @@
+{
+  "appointments": [],
+  "availableSlots": [
+    { "id": "s1", "date": "2026-06-29", "time": "10:00", "available": true },
+    { "id": "s2", "date": "2026-06-29", "time": "11:00", "available": true },
+    { "id": "s3", "date": "2026-06-29", "time": "14:00", "available": true },
+    { "id": "s4", "date": "2026-06-29", "time": "15:00", "available": true },
+    { "id": "s5", "date": "2026-06-30", "time": "10:00", "available": true },
+    { "id": "s6", "date": "2026-06-30", "time": "11:00", "available": true },
+    { "id": "s7", "date": "2026-06-30", "time": "14:00", "available": true },
+    { "id": "s8", "date": "2026-07-01", "time": "10:00", "available": true },
+    { "id": "s9", "date": "2026-07-01", "time": "11:00", "available": true },
+    { "id": "s10", "date": "2026-07-01", "time": "14:00", "available": true }
+  ]
+}

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة التحكم — مكتب أشرف لطفي للمحاماة</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="admin-body">
+
+<!-- Login Screen -->
+<div id="loginScreen" class="admin-login">
+  <div class="login-card">
+    <div class="logo">⚖️</div>
+    <h2>لوحة تحكم المكتب</h2>
+    <p>أدخل كلمة المرور للوصول إلى لوحة التحكم</p>
+    <div class="form-group">
+      <label>كلمة المرور</label>
+      <input type="password" id="adminPassword" placeholder="أدخل كلمة المرور" onkeydown="if(event.key==='Enter') adminLogin()">
+    </div>
+    <div id="loginError" class="error-msg"></div>
+    <button class="btn-submit" onclick="adminLogin()">🔐 دخول</button>
+  </div>
+</div>
+
+<!-- Dashboard -->
+<div id="dashboardScreen" class="admin-layout hidden">
+
+  <!-- Sidebar -->
+  <aside class="admin-sidebar">
+    <div class="sidebar-brand">
+      <div class="logo-icon">⚖️</div>
+      <h3>مكتب أشرف لطفي</h3>
+      <p>لوحة إدارة المكتب</p>
+    </div>
+    <ul class="sidebar-nav">
+      <li><a href="#" class="active" onclick="showTab('overview', this)"><span class="nav-icon">📊</span> نظرة عامة</a></li>
+      <li><a href="#" onclick="showTab('appointments', this)"><span class="nav-icon">📅</span> الحجوزات</a></li>
+      <li><a href="#" onclick="showTab('slots', this)"><span class="nav-icon">🕐</span> المواعيد المتاحة</a></li>
+    </ul>
+    <div class="sidebar-logout">
+      <ul class="sidebar-nav">
+        <li><a href="#" onclick="adminLogout()"><span class="nav-icon">🚪</span> تسجيل الخروج</a></li>
+      </ul>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="admin-main">
+
+    <!-- Overview Tab -->
+    <div class="tab-content active" id="tab-overview">
+      <div class="admin-topbar">
+        <div>
+          <h1>نظرة عامة 📊</h1>
+          <p id="todayDate"></p>
+        </div>
+        <button class="btn-primary" onclick="loadAll()" style="padding:10px 20px; font-size:14px">🔄 تحديث</button>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon blue">📅</div>
+          <div>
+            <div class="stat-num" id="statTotal">0</div>
+            <div class="stat-lbl">إجمالي الحجوزات</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon gold">✅</div>
+          <div>
+            <div class="stat-num" id="statConfirmed">0</div>
+            <div class="stat-lbl">حجوزات مؤكدة</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green">🎯</div>
+          <div>
+            <div class="stat-num" id="statCompleted">0</div>
+            <div class="stat-lbl">استشارات مكتملة</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon red">❌</div>
+          <div>
+            <div class="stat-num" id="statCancelled">0</div>
+            <div class="stat-lbl">حجوزات ملغية</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h3>📋 آخر الحجوزات</h3>
+          <button class="btn-sm btn-sm-primary" onclick="showTab('appointments', null)">عرض الكل</button>
+        </div>
+        <div class="admin-card-body" style="padding:0">
+          <div id="recentAppointments" style="overflow-x:auto">
+            <div style="padding:40px; text-align:center; color:var(--text-muted)">جارٍ التحميل...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Appointments Tab -->
+    <div class="tab-content" id="tab-appointments">
+      <div class="admin-topbar">
+        <div>
+          <h1>الحجوزات 📅</h1>
+          <p>إدارة جميع حجوزات الاستشارات</p>
+        </div>
+        <button class="btn-primary" onclick="loadAppointments()" style="padding:10px 20px; font-size:14px">🔄 تحديث</button>
+      </div>
+
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h3>قائمة الحجوزات</h3>
+          <div class="filter-bar" style="margin:0">
+            <select class="filter-select" id="filterStatus" onchange="filterAppointments()">
+              <option value="">جميع الحالات</option>
+              <option value="confirmed">مؤكدة</option>
+              <option value="completed">مكتملة</option>
+              <option value="cancelled">ملغية</option>
+            </select>
+          </div>
+        </div>
+        <div class="admin-card-body" style="padding:0; overflow-x:auto">
+          <div id="appointmentsTable">
+            <div style="padding:40px; text-align:center; color:var(--text-muted)">جارٍ التحميل...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slots Tab -->
+    <div class="tab-content" id="tab-slots">
+      <div class="admin-topbar">
+        <div>
+          <h1>المواعيد المتاحة 🕐</h1>
+          <p>إضافة وإدارة المواعيد التي يمكن للعملاء حجزها</p>
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h3>➕ إضافة موعد جديد</h3>
+        </div>
+        <div class="admin-card-body">
+          <div id="slotAlert" class="alert"></div>
+          <div class="slot-form">
+            <div class="form-group">
+              <label>التاريخ</label>
+              <input type="date" id="newSlotDate">
+            </div>
+            <div class="form-group">
+              <label>الوقت</label>
+              <input type="time" id="newSlotTime">
+            </div>
+            <button class="btn-primary" onclick="addSlot()" style="padding:13px 28px; font-size:14px; white-space:nowrap">
+              ➕ إضافة موعد
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h3>قائمة المواعيد</h3>
+          <button class="btn-sm btn-sm-primary" onclick="loadSlots()">🔄 تحديث</button>
+        </div>
+        <div class="admin-card-body">
+          <div id="slotsList">
+            <div style="text-align:center; color:var(--text-muted)">جارٍ التحميل...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Confirm Cancel Modal -->
+<div class="modal-overlay" id="cancelModal">
+  <div class="modal">
+    <h3>⚠️ إلغاء الحجز</h3>
+    <p>هل أنت متأكد من إلغاء هذا الحجز؟ سيتم إعادة الموعد للمواعيد المتاحة.</p>
+    <div class="modal-actions">
+      <button class="btn-sm btn-sm-danger" onclick="confirmCancel()" style="padding:10px 28px; font-size:14px">نعم، إلغاء الحجز</button>
+      <button class="btn-sm" onclick="closeModal()" style="padding:10px 28px; font-size:14px; background:var(--cream); color:var(--navy)">لا، تراجع</button>
+    </div>
+  </div>
+</div>
+
+<script src="/js/admin.js"></script>
+</body>
+</html>

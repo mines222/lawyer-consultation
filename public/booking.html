@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>حجز استشارة — مكتب أشرف لطفي للمحاماة</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="navbar-brand">
+    <div class="logo-icon">⚖️</div>
+    <div class="brand-text">
+      <strong>مكتب أشرف لطفي</strong>
+      <span>للمحاماة والاستشارات القانونية</span>
+    </div>
+  </div>
+  <ul class="navbar-nav">
+    <li><a href="/">الرئيسية</a></li>
+    <li><a href="/#services">خدماتنا</a></li>
+    <li><a href="/booking.html" class="btn-book-nav">احجز الآن</a></li>
+  </ul>
+</nav>
+
+<div class="page-header">
+  <h1>📅 احجز استشارتك القانونية</h1>
+  <p>أكمل الخطوات التالية لتأكيد موعد استشارتك عبر الإنترنت</p>
+</div>
+
+<div class="booking-container">
+
+  <!-- Success Screen -->
+  <div class="booking-card" id="successScreen" style="display:none">
+    <div class="success-screen">
+      <div class="success-icon">✅</div>
+      <h2>تم الحجز بنجاح!</h2>
+      <p>سيتواصل معك فريقنا قبل الموعد بوقت كافٍ. احتفظ برقم الحجز للدخول إلى غرفة الاستشارة.</p>
+      <div class="appt-id-box">
+        <div class="label">رقم الحجز (احتفظ به)</div>
+        <div class="id" id="successApptId">—</div>
+      </div>
+      <a id="joinBtn" href="#" class="btn-primary" style="margin:0 auto; display:inline-flex">
+        🎥 دخول غرفة الاستشارة
+      </a>
+      <br><br>
+      <a href="/" style="color:var(--text-muted); font-size:14px">← العودة للرئيسية</a>
+    </div>
+  </div>
+
+  <!-- Booking Card -->
+  <div class="booking-card" id="bookingCard">
+    <!-- Steps Bar -->
+    <div class="booking-steps-bar">
+      <div class="step-dot active" id="stepDot1">
+        <div class="dot">١</div>
+        <span>بياناتك</span>
+      </div>
+      <div class="step-line" id="stepLine1"></div>
+      <div class="step-dot" id="stepDot2">
+        <div class="dot">٢</div>
+        <span>نوع الاستشارة</span>
+      </div>
+      <div class="step-line" id="stepLine2"></div>
+      <div class="step-dot" id="stepDot3">
+        <div class="dot">٣</div>
+        <span>الموعد</span>
+      </div>
+      <div class="step-line" id="stepLine3"></div>
+      <div class="step-dot" id="stepDot4">
+        <div class="dot">٤</div>
+        <span>التأكيد</span>
+      </div>
+    </div>
+
+    <div class="booking-body">
+      <div id="alertBox" class="alert alert-danger"></div>
+
+      <!-- Step 1: Personal Info -->
+      <div class="step-content active" id="step1">
+        <h3>👤 بياناتك الشخصية</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>الاسم الكامل *</label>
+            <input type="text" id="clientName" placeholder="أحمد محمد العلي">
+          </div>
+          <div class="form-group">
+            <label>رقم الهاتف *</label>
+            <input type="tel" id="clientPhone" placeholder="+971 50 000 0000">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>البريد الإلكتروني *</label>
+          <input type="email" id="clientEmail" placeholder="example@email.com">
+        </div>
+        <div class="form-group">
+          <label>موضوع الاستشارة (اختياري)</label>
+          <input type="text" id="clientSubject" placeholder="مثال: قضية عمالية، عقد تجاري...">
+        </div>
+        <div class="booking-footer">
+          <div></div>
+          <button class="btn-next" onclick="goToStep(2)">التالي ←</button>
+        </div>
+      </div>
+
+      <!-- Step 2: Consultation Type -->
+      <div class="step-content" id="step2">
+        <h3>🎙️ اختر نوع الاستشارة</h3>
+        <div class="type-options">
+          <div>
+            <input type="radio" name="consultType" id="typeAudio" value="audio" class="type-option">
+            <label for="typeAudio" class="type-label">
+              <span class="type-icon">🎧</span>
+              <span class="type-name">صوت فقط</span>
+              <span class="type-desc">استشارة صوتية عبر الإنترنت بدون كاميرا</span>
+            </label>
+          </div>
+          <div>
+            <input type="radio" name="consultType" id="typeVideo" value="video" class="type-option">
+            <label for="typeVideo" class="type-label">
+              <span class="type-icon">📹</span>
+              <span class="type-name">صوت وصورة</span>
+              <span class="type-desc">استشارة بالفيديو مع المحامي وجهاً لوجه</span>
+            </label>
+          </div>
+        </div>
+        <div class="booking-footer">
+          <button class="btn-back" onclick="goToStep(1)">→ السابق</button>
+          <button class="btn-next" onclick="goToStep(3)">التالي ←</button>
+        </div>
+      </div>
+
+      <!-- Step 3: Choose Slot -->
+      <div class="step-content" id="step3">
+        <h3>📅 اختر الموعد المناسب</h3>
+        <div id="slotsContainer">
+          <div style="text-align:center; padding:40px; color:var(--text-muted)">
+            <div style="font-size:32px; margin-bottom:12px">⏳</div>
+            جارٍ تحميل المواعيد المتاحة...
+          </div>
+        </div>
+        <div class="booking-footer">
+          <button class="btn-back" onclick="goToStep(2)">→ السابق</button>
+          <button class="btn-next" onclick="goToStep(4)">التالي ←</button>
+        </div>
+      </div>
+
+      <!-- Step 4: Confirmation -->
+      <div class="step-content" id="step4">
+        <h3>✅ مراجعة وتأكيد الحجز</h3>
+        <div class="confirmation-box">
+          <h4>تفاصيل الحجز</h4>
+          <div class="confirm-row">
+            <span class="label">الاسم</span>
+            <span class="value" id="confName">—</span>
+          </div>
+          <div class="confirm-row">
+            <span class="label">الهاتف</span>
+            <span class="value" id="confPhone">—</span>
+          </div>
+          <div class="confirm-row">
+            <span class="label">البريد الإلكتروني</span>
+            <span class="value" id="confEmail">—</span>
+          </div>
+          <div class="confirm-row">
+            <span class="label">نوع الاستشارة</span>
+            <span class="value" id="confType">—</span>
+          </div>
+          <div class="confirm-row">
+            <span class="label">التاريخ</span>
+            <span class="value" id="confDate">—</span>
+          </div>
+          <div class="confirm-row">
+            <span class="label">الوقت</span>
+            <span class="value" id="confTime">—</span>
+          </div>
+        </div>
+        <p style="font-size:13px; color:var(--text-muted); margin-bottom:16px">
+          🔒 بياناتك محمية وسرية تماماً. بالضغط على "تأكيد الحجز" تقر بموافقتك على شروط الخدمة.
+        </p>
+        <div class="booking-footer">
+          <button class="btn-back" onclick="goToStep(3)">→ السابق</button>
+          <button class="btn-submit" id="submitBtn" onclick="submitBooking()">
+            <span id="submitText">✅ تأكيد الحجز</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="/js/booking.js"></script>
+</body>
+</html>
