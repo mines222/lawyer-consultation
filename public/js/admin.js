@@ -1,58 +1,56 @@
-let adminToken = localStorage.getItem('adminToken');
+let adminToken  = localStorage.getItem('adminToken');
+let isMaster    = localStorage.getItem('adminMaster') === 'true';
 let allAppointments = [];
-let cancelTargetId = null;
+let cancelTargetId  = null;
+let currentBookingId = null;
 
-const arabicDays = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+const arabicDays   = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
 const arabicMonths = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
 
 function formatDate(dateStr) {
   const d = new Date(dateStr + 'T00:00:00');
   return `${arabicDays[d.getDay()]}، ${d.getDate()} ${arabicMonths[d.getMonth()]}`;
 }
-
 function formatDateTime(iso) {
   const d = new Date(iso);
-  return d.toLocaleDateString('ar-AE') + ' ' + d.toLocaleTimeString('ar-AE', { hour: '2-digit', minute: '2-digit' });
+  return d.toLocaleDateString('ar-AE') + ' ' + d.toLocaleTimeString('ar-AE', { hour:'2-digit', minute:'2-digit' });
 }
-
 function statusBadge(status) {
-  const map = {
-    confirmed: ['badge-confirmed','مؤكدة'],
-    pending: ['badge-pending','قيد الانتظار'],
-    completed: ['badge-completed','مكتملة'],
-    cancelled: ['badge-cancelled','ملغية']
-  };
+  const map = { confirmed:['badge-confirmed','مؤكدة'], pending:['badge-pending','قيد الانتظار'], completed:['badge-completed','مكتملة'], cancelled:['badge-cancelled','ملغية'] };
   const [cls, label] = map[status] || ['badge-pending', status];
   return `<span class="badge ${cls}">${label}</span>`;
 }
+function typeLabel(t) { return t === 'video' ? '📹 صوت وصورة' : '🎧 صوت فقط'; }
 
-function typeLabel(t) {
-  return t === 'video' ? '📹 صوت وصورة' : '🎧 صوت فقط';
-}
-
-// ── Auth ──
+// ── Auth ──────────────────────────────────────────────────────
 function adminLogin() {
-  const pass = document.getElementById('adminPassword').value;
+  const username = document.getElementById('adminUsername').value.trim();
+  const pass     = document.getElementById('adminPassword').value;
+  document.getElementById('loginError').textContent = '';
   fetch('/api/admin/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ password: pass })
+    body: JSON.stringify({ username: username || 'admin', password: pass })
   })
   .then(r => r.json())
   .then(data => {
     if (data.success) {
       adminToken = data.token;
+      isMaster   = data.master;
       localStorage.setItem('adminToken', adminToken);
+      localStorage.setItem('adminMaster', isMaster);
       showDashboard();
     } else {
-      document.getElementById('loginError').textContent = 'كلمة المرور غير صحيحة';
+      document.getElementById('loginError').textContent = data.error || 'خطأ في تسجيل الدخول';
     }
   })
   .catch(() => document.getElementById('loginError').textContent = 'تعذر الاتصال بالسيرفر');
 }
 
 function adminLogout() {
+  fetch('/api/admin/logout', { method:'POST', headers:{ 'x-admin-token': adminToken } }).catch(()=>{});
   localStorage.removeItem('adminToken');
+  localStorage.removeItem('adminMaster');
   location.reload();
 }
 
@@ -60,32 +58,32 @@ function showDashboard() {
   document.getElementById('loginScreen').classList.add('hidden');
   document.getElementById('dashboardScreen').classList.remove('hidden');
   document.getElementById('todayDate').textContent = new Date().toLocaleDateString('ar-AE', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+  document.getElementById('sidebarUsername').textContent = isMaster ? '👑 المدير الرئيسي' : '👤 مدير';
+  if (isMaster) document.getElementById('userMgmtCard').style.display = 'block';
   loadAll();
 }
 
-// ── Tabs ──
+// ── Tabs ──────────────────────────────────────────────────────
 function showTab(name, el) {
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
   document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
   if (el) el.classList.add('active');
   if (name === 'appointments') loadAppointments();
-  if (name === 'slots') loadSlots();
+  if (name === 'slots')        loadSlots();
+  if (name === 'settings' && isMaster) loadUsers();
 }
 
-// ── Load All ──
-function loadAll() {
-  loadAppointments();
-  loadSlots();
-}
+function loadAll() { loadAppointments(); loadSlots(); }
 
-// ── Appointments ──
+// ── Appointments ──────────────────────────────────────────────
 async function loadAppointments() {
   try {
-    const res = await fetch('/api/admin/appointments', { headers: { 'x-admin-token': adminToken } });
+    const res = await fetch('/api/admin/appointments', { headers:{ 'x-admin-token': adminToken } });
+    if (res.status === 401) return handleUnauth();
     allAppointments = await res.json();
     updateStats();
-    renderAppointments(allAppointments.slice(0, 5), 'recentAppointments');
+    renderAppointments(allAppointments.slice(0,5), 'recentAppointments');
     renderAppointments(allAppointments, 'appointmentsTable');
   } catch {
     document.getElementById('appointmentsTable').innerHTML = '<div style="padding:24px;text-align:center;color:var(--danger)">⚠️ تعذر تحميل البيانات</div>';
@@ -93,40 +91,28 @@ async function loadAppointments() {
 }
 
 function updateStats() {
-  document.getElementById('statTotal').textContent = allAppointments.length;
-  document.getElementById('statConfirmed').textContent = allAppointments.filter(a => a.status === 'confirmed').length;
-  document.getElementById('statCompleted').textContent = allAppointments.filter(a => a.status === 'completed').length;
-  document.getElementById('statCancelled').textContent = allAppointments.filter(a => a.status === 'cancelled').length;
+  document.getElementById('statTotal').textContent     = allAppointments.length;
+  document.getElementById('statConfirmed').textContent = allAppointments.filter(a => a.status==='confirmed').length;
+  document.getElementById('statCompleted').textContent = allAppointments.filter(a => a.status==='completed').length;
+  document.getElementById('statCancelled').textContent = allAppointments.filter(a => a.status==='cancelled').length;
 }
 
 function renderAppointments(list, containerId) {
   const container = document.getElementById(containerId);
-  if (!list.length) {
+  if (!list || !list.length) {
     container.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-muted)">📭 لا توجد حجوزات بعد</div>';
     return;
   }
   let html = `<table class="appointments-table">
-    <thead><tr>
-      <th>العميل</th><th>الهاتف</th><th>نوع الاستشارة</th><th>التاريخ</th><th>الوقت</th><th>الحالة</th><th>الإجراءات</th>
-    </tr></thead><tbody>`;
+    <thead><tr><th>العميل</th><th>الهاتف</th><th>نوع الاستشارة</th><th>التاريخ</th><th>الوقت</th><th>الحالة</th></tr></thead><tbody>`;
   list.forEach(a => {
-    html += `<tr>
+    html += `<tr class="appt-row" onclick="openBookingDetail('${a.id}')" title="اضغط لعرض التفاصيل">
       <td><strong>${a.name}</strong><br><span style="font-size:12px;color:var(--text-muted)">${a.email}</span></td>
       <td>${a.phone}</td>
       <td>${typeLabel(a.type)}</td>
       <td>${formatDate(a.date)}</td>
       <td><strong>${a.time}</strong></td>
       <td>${statusBadge(a.status)}</td>
-      <td>
-        <div class="action-btns">
-          ${a.status === 'confirmed' ? `
-            <button class="btn-sm btn-sm-primary" onclick="startSession('${a.id}')">🎥 بدء</button>
-            <button class="btn-sm btn-sm-success" onclick="markCompleted('${a.id}')">✅ مكتملة</button>
-            <button class="btn-sm btn-sm-danger" onclick="openCancelModal('${a.id}')">❌ إلغاء</button>
-          ` : a.status === 'completed' ? '<span style="color:var(--success);font-size:13px">✅ مكتملة</span>'
-            : a.status === 'cancelled' ? '<span style="color:var(--danger);font-size:13px">❌ ملغية</span>' : ''}
-        </div>
-      </td>
     </tr>`;
   });
   html += '</tbody></table>';
@@ -134,102 +120,125 @@ function renderAppointments(list, containerId) {
 }
 
 function filterAppointments() {
-  const status = document.getElementById('filterStatus').value;
+  const status   = document.getElementById('filterStatus').value;
   const filtered = status ? allAppointments.filter(a => a.status === status) : allAppointments;
   renderAppointments(filtered, 'appointmentsTable');
 }
 
-async function startSession(id) {
+// ── Booking Detail Popup ──────────────────────────────────────
+function openBookingDetail(id) {
+  const a = allAppointments.find(x => x.id === id);
+  if (!a) return;
+  currentBookingId = id;
+
+  document.getElementById('bd-name').textContent    = a.name;
+  document.getElementById('bd-phone').textContent   = a.phone;
+  document.getElementById('bd-email').textContent   = a.email;
+  document.getElementById('bd-date').textContent    = formatDate(a.date) + ' ' + a.date;
+  document.getElementById('bd-time').textContent    = a.time;
+  document.getElementById('bd-type').textContent    = typeLabel(a.type);
+  document.getElementById('bd-status').innerHTML    = statusBadge(a.status);
+  document.getElementById('bd-created').textContent = a.createdAt ? formatDateTime(a.createdAt) : '—';
+  document.getElementById('bd-code').textContent    = a.id;
+  document.getElementById('bd-copyMsg').textContent = '';
+
+  const joinUrl = `${location.origin}/consultation.html?id=${a.id}&name=${encodeURIComponent(a.name)}`;
+  const linkEl  = document.getElementById('bd-joinLink');
+  linkEl.href   = joinUrl;
+  linkEl.textContent = '🔗 ' + joinUrl;
+
+  // Action buttons
+  const actionsEl = document.getElementById('bd-actions');
+  actionsEl.innerHTML = '';
+  if (a.status === 'confirmed') {
+    actionsEl.innerHTML = `
+      <button class="btn-primary" onclick="startSessionFromModal('${a.id}')">🎥 بدء الاستشارة</button>
+      <button class="btn-sm btn-sm-success" onclick="markCompletedFromModal('${a.id}')">✅ تحديد كمكتملة</button>
+      <button class="btn-sm btn-sm-danger"  onclick="openCancelModal('${a.id}')">❌ إلغاء الحجز</button>`;
+  } else if (a.status === 'completed') {
+    actionsEl.innerHTML = `<button class="btn-primary" onclick="startSessionFromModal('${a.id}')">🎥 إعادة فتح الغرفة</button>`;
+  }
+
+  document.getElementById('bookingModal').classList.add('show');
+}
+
+function copyCode() {
+  const code = document.getElementById('bd-code').textContent;
+  navigator.clipboard.writeText(code).then(() => {
+    document.getElementById('bd-copyMsg').textContent = '✅ تم نسخ الكود!';
+    setTimeout(() => document.getElementById('bd-copyMsg').textContent = '', 2500);
+  });
+}
+
+async function startSessionFromModal(id) {
   try {
-    const res = await fetch('/api/admin/token', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-admin-token': adminToken },
-      body: JSON.stringify({ appointmentId: id })
-    });
+    const res  = await fetch('/api/admin/token', { method:'POST', headers:{ 'Content-Type':'application/json', 'x-admin-token': adminToken }, body: JSON.stringify({ appointmentId: id }) });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error);
     window.open(`/consultation.html?id=${id}&name=${encodeURIComponent('المستشار القانوني')}&admin=1&token=${encodeURIComponent(data.token)}&room=${data.roomName}`, '_blank');
   } catch(e) { alert('خطأ: ' + e.message); }
 }
 
-async function markCompleted(id) {
-  await fetch(`/api/admin/appointments/${id}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json', 'x-admin-token': adminToken },
-    body: JSON.stringify({ status: 'completed' })
-  });
+async function markCompletedFromModal(id) {
+  await fetch(`/api/admin/appointments/${id}`, { method:'PUT', headers:{ 'Content-Type':'application/json', 'x-admin-token': adminToken }, body: JSON.stringify({ status:'completed' }) });
+  closeModal('bookingModal');
   loadAppointments();
 }
 
+// ── Legacy helpers (keep for compatibility) ───────────────────
 function openCancelModal(id) {
   cancelTargetId = id;
+  closeModal('bookingModal');
   document.getElementById('cancelModal').classList.add('show');
 }
-
-function closeModal() {
-  document.getElementById('cancelModal').classList.remove('show');
-  cancelTargetId = null;
+function closeModal(id) {
+  document.getElementById(id).classList.remove('show');
+  if (id === 'cancelModal') cancelTargetId = null;
 }
-
+function handleOverlayClick(e, modalId) {
+  if (e.target === document.getElementById(modalId)) closeModal(modalId);
+}
 async function confirmCancel() {
   if (!cancelTargetId) return;
-  await fetch(`/api/admin/appointments/${cancelTargetId}`, {
-    method: 'DELETE',
-    headers: { 'x-admin-token': adminToken }
-  });
-  closeModal();
+  await fetch(`/api/admin/appointments/${cancelTargetId}`, { method:'DELETE', headers:{ 'x-admin-token': adminToken } });
+  closeModal('cancelModal');
   loadAll();
 }
 
-// ── Slots ──
+// ── Slots ─────────────────────────────────────────────────────
 async function loadSlots() {
   try {
-    const res = await fetch('/api/admin/slots', { headers: { 'x-admin-token': adminToken } });
+    const res   = await fetch('/api/admin/slots', { headers:{ 'x-admin-token': adminToken } });
     const slots = await res.json();
     const container = document.getElementById('slotsList');
-    if (!slots.length) {
-      container.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px">لا توجد مواعيد مضافة</div>';
-      return;
-    }
-    const arabicDays2 = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
-    const arabicMonths2 = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
-    const fmt = (ds) => { const d = new Date(ds+'T00:00:00'); return `${arabicDays2[d.getDay()]} ${d.getDate()} ${arabicMonths2[d.getMonth()]} ${d.getFullYear()}`; };
+    if (!slots.length) { container.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px">لا توجد مواعيد مضافة</div>'; return; }
+    const fmt = ds => { const d = new Date(ds+'T00:00:00'); return `${arabicDays[d.getDay()]} ${d.getDate()} ${arabicMonths[d.getMonth()]} ${d.getFullYear()}`; };
     let html = '';
-    slots.sort((a,b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time)).forEach(s => {
+    slots.sort((a,b) => a.date.localeCompare(b.date)||a.time.localeCompare(b.time)).forEach(s => {
       html += `<div class="slot-item">
-        <div class="slot-info">
-          <span>📅 ${fmt(s.date)}</span>
-          <span style="color:var(--gold);font-size:16px">⏰ ${s.time}</span>
-        </div>
+        <div class="slot-info"><span>📅 ${fmt(s.date)}</span><span style="color:var(--gold);font-size:16px">⏰ ${s.time}</span></div>
         <div style="display:flex;align-items:center;gap:12px">
-          <span class="slot-status ${s.available ? '' : 'booked'}">${s.available ? '✅ متاح' : '🔒 محجوز'}</span>
-          ${s.available ? `<button class="btn-sm btn-sm-danger" onclick="deleteSlot('${s.id}')">🗑️ حذف</button>` : ''}
+          <span class="slot-status ${s.available?'':'booked'}">${s.available?'✅ متاح':'🔒 محجوز'}</span>
+          ${s.available?`<button class="btn-sm btn-sm-danger" onclick="deleteSlot('${s.id}')">🗑️ حذف</button>`:''}
         </div>
       </div>`;
     });
     container.innerHTML = html;
-  } catch {
-    document.getElementById('slotsList').innerHTML = '<div style="color:var(--danger)">تعذر تحميل المواعيد</div>';
-  }
+  } catch { document.getElementById('slotsList').innerHTML = '<div style="color:var(--danger)">تعذر تحميل المواعيد</div>'; }
 }
 
-function showSlotAlert(msg, type = 'success') {
+function showSlotAlert(msg, type='success') {
   const el = document.getElementById('slotAlert');
-  el.textContent = msg;
-  el.className = `alert alert-${type} show`;
+  el.textContent = msg; el.className = `alert alert-${type} show`;
   setTimeout(() => el.classList.remove('show'), 3500);
 }
 
 async function addSlot() {
   const date = document.getElementById('newSlotDate').value;
   const time = document.getElementById('newSlotTime').value;
-  if (!date || !time) return showSlotAlert('يرجى تحديد التاريخ والوقت', 'danger');
+  if (!date||!time) return showSlotAlert('يرجى تحديد التاريخ والوقت', 'danger');
   try {
-    const res = await fetch('/api/admin/slots', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-admin-token': adminToken },
-      body: JSON.stringify({ date, time })
-    });
+    const res  = await fetch('/api/admin/slots', { method:'POST', headers:{ 'Content-Type':'application/json', 'x-admin-token': adminToken }, body: JSON.stringify({ date, time }) });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error);
     showSlotAlert('✅ تم إضافة الموعد بنجاح');
@@ -240,9 +249,92 @@ async function addSlot() {
 }
 
 async function deleteSlot(id) {
-  await fetch(`/api/admin/slots/${id}`, { method: 'DELETE', headers: { 'x-admin-token': adminToken } });
+  await fetch(`/api/admin/slots/${id}`, { method:'DELETE', headers:{ 'x-admin-token': adminToken } });
   loadSlots();
 }
 
-// ── Init ──
+// ── Settings — Change Password ─────────────────────────────────
+async function changePassword() {
+  const current  = document.getElementById('currentPass').value;
+  const newP     = document.getElementById('newPass').value;
+  const confirm  = document.getElementById('confirmPass').value;
+  const alertEl  = document.getElementById('passAlert');
+
+  alertEl.className = 'alert'; alertEl.textContent = '';
+
+  if (!current||!newP||!confirm) { showSettingsAlert(alertEl, 'جميع الحقول مطلوبة', 'danger'); return; }
+  if (newP !== confirm) { showSettingsAlert(alertEl, 'كلمتا المرور غير متطابقتين', 'danger'); return; }
+  if (newP.length < 6) { showSettingsAlert(alertEl, 'كلمة المرور الجديدة 6 أحرف على الأقل', 'danger'); return; }
+
+  try {
+    const res  = await fetch('/api/admin/users/me/password', { method:'PUT', headers:{ 'Content-Type':'application/json', 'x-admin-token': adminToken }, body: JSON.stringify({ currentPassword: current, newPassword: newP }) });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    showSettingsAlert(alertEl, '✅ تم تغيير كلمة المرور بنجاح', 'success');
+    document.getElementById('currentPass').value = '';
+    document.getElementById('newPass').value     = '';
+    document.getElementById('confirmPass').value = '';
+  } catch(e) { showSettingsAlert(alertEl, e.message, 'danger'); }
+}
+
+// ── Settings — User Management ────────────────────────────────
+async function loadUsers() {
+  if (!isMaster) return;
+  try {
+    const res   = await fetch('/api/admin/users', { headers:{ 'x-admin-token': adminToken } });
+    const users = await res.json();
+    const container = document.getElementById('usersList');
+    if (!users.length) { container.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px">لا يوجد مستخدمون مضافون بعد</div>'; return; }
+    let html = `<table class="appointments-table"><thead><tr><th>اسم المستخدم</th><th>تاريخ الإضافة</th><th>الإجراءات</th></tr></thead><tbody>`;
+    users.forEach(u => {
+      html += `<tr>
+        <td><strong>👤 ${u.username}</strong></td>
+        <td>${u.created_at ? formatDateTime(u.created_at) : '—'}</td>
+        <td><button class="btn-sm btn-sm-danger" onclick="deleteUser('${u.id}','${u.username}')">🗑️ حذف</button></td>
+      </tr>`;
+    });
+    html += '</tbody></table>';
+    container.innerHTML = html;
+  } catch { document.getElementById('usersList').innerHTML = '<div style="color:var(--danger)">تعذر تحميل المستخدمين</div>'; }
+}
+
+async function addUser() {
+  const username = document.getElementById('newUsername').value.trim();
+  const password = document.getElementById('newUserPass').value;
+  const alertEl  = document.getElementById('usersAlert');
+  if (!username||!password) { showSettingsAlert(alertEl, 'اسم المستخدم وكلمة المرور مطلوبان', 'danger'); return; }
+  try {
+    const res  = await fetch('/api/admin/users', { method:'POST', headers:{ 'Content-Type':'application/json', 'x-admin-token': adminToken }, body: JSON.stringify({ username, password }) });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    showSettingsAlert(alertEl, `✅ تم إضافة المستخدم "${username}" بنجاح`, 'success');
+    document.getElementById('newUsername').value = '';
+    document.getElementById('newUserPass').value = '';
+    loadUsers();
+  } catch(e) { showSettingsAlert(alertEl, e.message, 'danger'); }
+}
+
+async function deleteUser(id, username) {
+  if (!confirm(`هل تريد حذف المستخدم "${username}"؟`)) return;
+  const alertEl = document.getElementById('usersAlert');
+  try {
+    const res = await fetch(`/api/admin/users/${id}`, { method:'DELETE', headers:{ 'x-admin-token': adminToken } });
+    if (!res.ok) throw new Error((await res.json()).error);
+    showSettingsAlert(alertEl, `✅ تم حذف المستخدم "${username}"`, 'success');
+    loadUsers();
+  } catch(e) { showSettingsAlert(alertEl, e.message, 'danger'); }
+}
+
+function showSettingsAlert(el, msg, type) {
+  el.textContent = msg; el.className = `alert alert-${type} show`;
+  setTimeout(() => el.classList.remove('show'), 4000);
+}
+
+function handleUnauth() {
+  localStorage.removeItem('adminToken');
+  localStorage.removeItem('adminMaster');
+  location.reload();
+}
+
+// ── Init ──────────────────────────────────────────────────────
 if (adminToken) showDashboard();
