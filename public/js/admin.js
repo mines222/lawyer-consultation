@@ -245,7 +245,7 @@ async function loadSlots() {
         <div class="slot-info"><span>📅 ${fmt(s.date)}</span><span style="color:var(--gold);font-size:16px">⏰ ${s.time}</span></div>
         <div style="display:flex;align-items:center;gap:12px">
           <span class="slot-status ${s.available?'':'booked'}">${s.available?'✅ متاح':'🔒 محجوز'}</span>
-          ${s.available?`<button class="btn-sm btn-sm-danger" onclick="deleteSlot('${s.id}')">🗑️ حذف</button>`:''}
+          <button class="btn-sm btn-sm-danger" onclick="deleteSlot('${s.id}')">🗑️ حذف</button>
         </div>
       </div>`;
     });
