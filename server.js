@@ -83,6 +83,14 @@ function adminAuth(req, res, next) {
     res.status(401).json({ error: 'الجلسة منتهية، سجل الدخول مجدداً' });
   }
 }
+// administrator or master — full dashboard access
+function adminOnly(req, res, next) {
+  const { master, role } = req.adminUser || {};
+  if (!master && role !== 'administrator')
+    return res.status(403).json({ error: 'هذا الإجراء للمديرين فقط' });
+  next();
+}
+// master only — user management
 function masterOnly(req, res, next) {
   if (!req.adminUser?.master) return res.status(403).json({ error: 'هذا الإجراء للمدير الرئيسي فقط' });
   next();
@@ -138,10 +146,10 @@ app.post('/api/admin/login', loginLimiter, async (req, res) => {
   const { username, password } = req.body;
   if (!password) return res.status(400).json({ error: 'كلمة المرور مطلوبة' });
 
-  // 1) Check master admin (env var) — username 'admin' or empty
-  if ((!username || username === 'admin') && password === MASTER_PASSWORD) {
-    const token = jwt.sign({ role: 'admin', master: true, username: 'admin' }, SESSION_SECRET, { expiresIn: '8h' });
-    return res.json({ success: true, token, master: true });
+  // 1) Check master admin (env var)
+  if ((!username || username === 'master' || username === 'admin') && password === MASTER_PASSWORD) {
+    const token = jwt.sign({ role: 'administrator', master: true, username: 'master' }, SESSION_SECRET, { expiresIn: '8h' });
+    return res.json({ success: true, token, master: true, role: 'administrator' });
   }
 
   // 2) Check Supabase users
@@ -149,8 +157,8 @@ app.post('/api/admin/login', loginLimiter, async (req, res) => {
     try {
       const { data: user } = await supabase.from('admin_users').select('*').eq('username', username).single();
       if (user && verifyPassword(password, user.password_hash)) {
-        const token = jwt.sign({ role: 'admin', master: false, username: user.username, userId: user.id }, SESSION_SECRET, { expiresIn: '8h' });
-        return res.json({ success: true, token, master: false });
+        const token = jwt.sign({ role: user.role, master: false, username: user.username, userId: user.id }, SESSION_SECRET, { expiresIn: '8h' });
+        return res.json({ success: true, token, master: false, role: user.role });
       }
     } catch {}
   }
@@ -172,7 +180,7 @@ app.get('/api/admin/appointments', adminAuth, async (req, res) => {
   } catch (e) { res.status(500).json({ error: sanitizeError(e) }); }
 });
 
-app.put('/api/admin/appointments/:id', adminAuth, async (req, res) => {
+app.put('/api/admin/appointments/:id', adminAuth, adminOnly, async (req, res) => {
   if (!isValidUUID(req.params.id)) return res.status(400).json({ error: 'معرف غير صحيح' });
   if (req.body.status && !VALID_STATUSES.includes(req.body.status)) return res.status(400).json({ error: 'حالة غير صحيحة' });
   try {
@@ -184,7 +192,7 @@ app.put('/api/admin/appointments/:id', adminAuth, async (req, res) => {
   } catch (e) { res.status(500).json({ error: sanitizeError(e) }); }
 });
 
-app.delete('/api/admin/appointments/:id', adminAuth, async (req, res) => {
+app.delete('/api/admin/appointments/:id', adminAuth, adminOnly, async (req, res) => {
   if (!isValidUUID(req.params.id)) return res.status(400).json({ error: 'معرف غير صحيح' });
   try {
     const { data: appt } = await supabase.from('appointments').select('slot_id').eq('id', req.params.id).single();
@@ -198,7 +206,7 @@ app.delete('/api/admin/appointments/:id', adminAuth, async (req, res) => {
 // ADMIN — SLOTS
 // ════════════════════════════════════════════════════════════════
 
-app.get('/api/admin/slots', adminAuth, async (req, res) => {
+app.get('/api/admin/slots', adminAuth, adminOnly, async (req, res) => {
   try {
     const { data, error } = await supabase.from('available_slots').select('*').order('date').order('time');
     if (error) throw error;
@@ -206,7 +214,7 @@ app.get('/api/admin/slots', adminAuth, async (req, res) => {
   } catch (e) { res.status(500).json({ error: sanitizeError(e) }); }
 });
 
-app.post('/api/admin/slots', adminAuth, async (req, res) => {
+app.post('/api/admin/slots', adminAuth, adminOnly, async (req, res) => {
   const { date, time } = req.body;
   if (!date || !time) return res.status(400).json({ error: 'التاريخ والوقت مطلوبان' });
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !/^\d{2}:\d{2}$/.test(time)) return res.status(400).json({ error: 'تنسيق التاريخ أو الوقت غير صحيح' });
@@ -220,7 +228,7 @@ app.post('/api/admin/slots', adminAuth, async (req, res) => {
   } catch (e) { res.status(500).json({ error: sanitizeError(e) }); }
 });
 
-app.delete('/api/admin/slots/:id', adminAuth, async (req, res) => {
+app.delete('/api/admin/slots/:id', adminAuth, adminOnly, async (req, res) => {
   try {
     const { error } = await supabase.from('available_slots').delete().eq('id', req.params.id);
     if (error) throw error;
@@ -253,8 +261,9 @@ app.get('/api/admin/users', adminAuth, masterOnly, async (req, res) => {
 
 // Add admin user (master only)
 app.post('/api/admin/users', adminAuth, masterOnly, async (req, res) => {
-  const { username, password } = req.body;
+  const { username, password, role } = req.body;
   if (!username || !password) return res.status(400).json({ error: 'اسم المستخدم وكلمة المرور مطلوبان' });
+  if (!['lawyer', 'administrator'].includes(role)) return res.status(400).json({ error: 'الدور غير صحيح' });
   if (username.length < 3 || username.length > 30) return res.status(400).json({ error: 'اسم المستخدم بين 3 و30 حرف' });
   if (password.length < 6) return res.status(400).json({ error: 'كلمة المرور 6 أحرف على الأقل' });
   if (username === 'admin') return res.status(400).json({ error: 'اسم المستخدم محجوز' });
@@ -262,7 +271,7 @@ app.post('/api/admin/users', adminAuth, masterOnly, async (req, res) => {
     const { data: existing } = await supabase.from('admin_users').select('id').eq('username', username).single();
     if (existing) return res.status(400).json({ error: 'اسم المستخدم مستخدم بالفعل' });
     const password_hash = hashPassword(password);
-    const { error } = await supabase.from('admin_users').insert({ username, password_hash });
+    const { error } = await supabase.from('admin_users').insert({ username, password_hash, role });
     if (error) throw error;
     res.json({ success: true });
   } catch (e) { res.status(500).json({ error: sanitizeError(e) }); }
