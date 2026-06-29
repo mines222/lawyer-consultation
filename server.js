@@ -112,7 +112,7 @@ app.post('/api/book', bookingLimiter, async (req, res) => {
   const { name, phone, email, slotId, type } = req.body;
   if (!name || !phone || !email || !slotId || !type) return res.status(400).json({ error: 'جميع الحقول مطلوبة' });
   if (!VALID_TYPES.includes(type)) return res.status(400).json({ error: 'نوع الاستشارة غير صحيح' });
-  if (!isValidUUID(slotId)) return res.status(400).json({ error: 'معرف الموعد غير صحيح' });
+  if (!slotId || typeof slotId !== 'string' || slotId.length > 100) return res.status(400).json({ error: 'معرف الموعد غير صحيح' });
   if (name.length > 100 || phone.length > 20 || email.length > 100) return res.status(400).json({ error: 'البيانات المدخلة طويلة جداً' });
   try {
     const { data: slot, error: slotErr } = await supabase.from('available_slots').select('*').eq('id', slotId).eq('available', true).single();
