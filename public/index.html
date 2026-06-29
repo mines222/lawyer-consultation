@@ -278,6 +278,39 @@
   </a>
 </section>
 
+<!-- Join Consultation -->
+<section class="section" id="join">
+  <div class="section-header">
+    <div class="section-tag" data-en="Already Booked?">لديك حجز مسبق؟</div>
+    <h2 data-en="Enter Your Consultation Room">ادخل غرفة الاستشارة</h2>
+    <p data-en="Have your booking code? Enter it below to join your scheduled consultation directly.">لديك رقم حجز؟ أدخله أدناه للدخول المباشر إلى غرفة استشارتك</p>
+    <div class="divider"></div>
+  </div>
+  <div class="join-box">
+    <div class="join-card">
+      <div class="join-icon">🎥</div>
+      <div class="join-fields">
+        <div class="form-group" style="margin:0">
+          <label data-en="Booking Code">رقم الحجز</label>
+          <input type="text" id="joinCode" class="join-input"
+            placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+            data-en-placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
+        </div>
+        <div class="form-group" style="margin:0">
+          <label data-en="Your Name">اسمك</label>
+          <input type="text" id="joinName" class="join-input"
+            placeholder="أحمد محمد"
+            data-en-placeholder="Ahmed Mohammed">
+        </div>
+        <button class="btn-primary join-btn" onclick="joinConsultation()">
+          🎥 <span data-en="Enter Consultation Room">دخول غرفة الاستشارة</span>
+        </button>
+      </div>
+      <div id="joinError" class="join-error"></div>
+    </div>
+  </div>
+</section>
+
 <!-- Footer -->
 <footer>
   <div class="footer-grid">
@@ -313,5 +346,44 @@
 </footer>
 
 <script src="/js/lang.js"></script>
+<script>
+async function joinConsultation() {
+  const code = document.getElementById('joinCode').value.trim();
+  const name = document.getElementById('joinName').value.trim();
+  const errEl = document.getElementById('joinError');
+  errEl.textContent = '';
+
+  if (!code) { errEl.textContent = document.documentElement.lang === 'en' ? 'Please enter your booking code' : 'يرجى إدخال رقم الحجز'; return; }
+  if (!name) { errEl.textContent = document.documentElement.lang === 'en' ? 'Please enter your name' : 'يرجى إدخال اسمك'; return; }
+
+  const btn = document.querySelector('.join-btn');
+  btn.disabled = true;
+  btn.innerHTML = '⏳ ...';
+
+  try {
+    const res = await fetch('/api/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ appointmentId: code, name })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    window.location.href = `/consultation.html?id=${encodeURIComponent(code)}&name=${encodeURIComponent(name)}`;
+  } catch (e) {
+    errEl.textContent = document.documentElement.lang === 'en'
+      ? 'Booking code not found. Please check and try again.'
+      : 'رقم الحجز غير موجود. تحقق من الرقم وحاول مجدداً.';
+    btn.disabled = false;
+    btn.innerHTML = '🎥 <span data-en="Enter Consultation Room">دخول غرفة الاستشارة</span>';
+  }
+}
+
+// Allow pressing Enter in the inputs
+['joinCode','joinName'].forEach(id => {
+  document.getElementById(id).addEventListener('keydown', e => {
+    if (e.key === 'Enter') joinConsultation();
+  });
+});
+</script>
 </body>
 </html>
