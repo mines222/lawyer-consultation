@@ -221,7 +221,7 @@ app.post('/api/admin/slots', adminAuth, adminOnly, async (req, res) => {
   try {
     const { data: existing } = await supabase.from('available_slots').select('id').eq('date', date).eq('time', time).single();
     if (existing) return res.status(400).json({ error: 'الموعد موجود بالفعل' });
-    const slot = { id: 's' + uuidv4().substring(0, 8), date, time, available: true };
+    const slot = { id: uuidv4(), date, time, available: true };
     const { error } = await supabase.from('available_slots').insert(slot);
     if (error) throw error;
     res.json({ success: true, slot });
