@@ -1062,6 +1062,7 @@ footer {
   .booking-body { padding: 24px 20px; }
   .brand-cert { display: none; }
   .brand-divider { display: none; }
+  .lang-btn { font-size: 11px; padding: 5px 10px; }
 }
 
 .hidden { display: none !important; }
