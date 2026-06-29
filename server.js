@@ -63,8 +63,7 @@ if (!ADMIN_PASSWORD) {
   process.exit(1);
 }
 
-// Session tokens — generated per login, NOT the password itself
-const activeSessions = new Set();
+const SESSION_SECRET = process.env.SESSION_SECRET || ADMIN_PASSWORD + '_session';
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -103,9 +102,13 @@ function generateJWT(roomName, userName, userEmail, userId, isModerator = false)
 // ── Admin Auth Middleware ─────────────────────────────────────
 function adminAuth(req, res, next) {
   const token = req.headers['x-admin-token'];
-  if (!token || !activeSessions.has(token))
-    return res.status(401).json({ error: 'غير مصرح' });
-  next();
+  if (!token) return res.status(401).json({ error: 'غير مصرح' });
+  try {
+    jwt.verify(token, SESSION_SECRET);
+    next();
+  } catch {
+    res.status(401).json({ error: 'الجلسة منتهية، سجل الدخول مجدداً' });
+  }
 }
 
 // ── Public API ───────────────────────────────────────────────
@@ -179,16 +182,13 @@ app.post('/api/token', tokenLimiter, async (req, res) => {
 app.post('/api/admin/login', loginLimiter, (req, res) => {
   if (req.body.password !== ADMIN_PASSWORD)
     return res.status(401).json({ error: 'كلمة المرور غير صحيحة' });
-  // Generate a random session token — never return the password itself
-  const sessionToken = uuidv4();
-  activeSessions.add(sessionToken);
-  // Expire session after 8 hours
-  setTimeout(() => activeSessions.delete(sessionToken), 8 * 60 * 60 * 1000);
+  // Signed JWT session — works across serverless instances
+  const sessionToken = jwt.sign({ role: 'admin' }, SESSION_SECRET, { expiresIn: '8h' });
   res.json({ success: true, token: sessionToken });
 });
 
-app.post('/api/admin/logout', adminAuth, (req, res) => {
-  activeSessions.delete(req.headers['x-admin-token']);
+app.post('/api/admin/logout', (req, res) => {
+  // Stateless JWT — client just deletes the token
   res.json({ success: true });
 });
 
