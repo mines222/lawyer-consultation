@@ -131,9 +131,16 @@
         <div class="admin-card-body">
           <div id="usersAlert" class="alert"></div>
           <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;align-items:flex-end">
-            <div class="form-group" style="margin:0;flex:1;min-width:150px"><label>اسم المستخدم</label><input type="text" id="newUsername" placeholder="username"></div>
-            <div class="form-group" style="margin:0;flex:1;min-width:150px"><label>كلمة المرور</label><input type="password" id="newUserPass" placeholder="كلمة المرور"></div>
-            <button class="btn-primary" onclick="addUser()" style="padding:12px 22px;white-space:nowrap">➕ إضافة مستخدم</button>
+            <div class="form-group" style="margin:0;flex:1;min-width:130px"><label>اسم المستخدم</label><input type="text" id="newUsername" placeholder="username"></div>
+            <div class="form-group" style="margin:0;flex:1;min-width:130px"><label>كلمة المرور</label><input type="password" id="newUserPass" placeholder="كلمة المرور"></div>
+            <div class="form-group" style="margin:0;min-width:140px">
+              <label>الدور</label>
+              <select id="newUserRole" class="filter-select" style="width:100%;padding:12px 14px;height:auto">
+                <option value="lawyer">⚖️ محامي (Lawyer)</option>
+                <option value="administrator">🛡️ مدير (Administrator)</option>
+              </select>
+            </div>
+            <button class="btn-primary" onclick="addUser()" style="padding:12px 22px;white-space:nowrap">➕ إضافة</button>
           </div>
           <div id="usersList"><div style="text-align:center;color:var(--text-muted)">جارٍ التحميل...</div></div>
         </div>

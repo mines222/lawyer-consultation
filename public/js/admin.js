@@ -1,8 +1,11 @@
 let adminToken  = localStorage.getItem('adminToken');
 let isMaster    = localStorage.getItem('adminMaster') === 'true';
+let adminRole   = localStorage.getItem('adminRole') || 'lawyer'; // lawyer | administrator
 let allAppointments = [];
 let cancelTargetId  = null;
 let currentBookingId = null;
+
+function isAdmin() { return isMaster || adminRole === 'administrator'; }
 
 const arabicDays   = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
 const arabicMonths = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
@@ -37,8 +40,10 @@ function adminLogin() {
     if (data.success) {
       adminToken = data.token;
       isMaster   = data.master;
+      adminRole  = data.role || 'lawyer';
       localStorage.setItem('adminToken', adminToken);
       localStorage.setItem('adminMaster', isMaster);
+      localStorage.setItem('adminRole', adminRole);
       showDashboard();
     } else {
       document.getElementById('loginError').textContent = data.error || 'خطأ في تسجيل الدخول';
@@ -51,6 +56,7 @@ function adminLogout() {
   fetch('/api/admin/logout', { method:'POST', headers:{ 'x-admin-token': adminToken } }).catch(()=>{});
   localStorage.removeItem('adminToken');
   localStorage.removeItem('adminMaster');
+  localStorage.removeItem('adminRole');
   location.reload();
 }
 
@@ -58,9 +64,27 @@ function showDashboard() {
   document.getElementById('loginScreen').classList.add('hidden');
   document.getElementById('dashboardScreen').classList.remove('hidden');
   document.getElementById('todayDate').textContent = new Date().toLocaleDateString('ar-AE', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
-  document.getElementById('sidebarUsername').textContent = isMaster ? '👑 المدير الرئيسي' : '👤 مدير';
+
+  // Role badge in sidebar
+  const roleLabels = { administrator: '🛡️ مدير', lawyer: '⚖️ محامي' };
+  const roleLabel  = isMaster ? '👑 المدير الرئيسي' : (roleLabels[adminRole] || '👤 مستخدم');
+  document.getElementById('sidebarUsername').textContent = roleLabel;
+
+  // Show/hide tabs based on role
+  if (!isAdmin()) {
+    // lawyer: hide slots, overview — show only appointments
+    document.querySelectorAll('.sidebar-nav a').forEach(a => {
+      const tab = a.getAttribute('onclick')?.match(/showTab\('(\w+)'/)?.[1];
+      if (tab && tab !== 'appointments' && tab !== 'settings') a.parentElement.style.display = 'none';
+    });
+    showTab('appointments', null);
+  }
+
+  // user management: master only
   if (isMaster) document.getElementById('userMgmtCard').style.display = 'block';
-  loadAll();
+
+  loadAppointments();
+  if (isAdmin()) loadSlots();
 }
 
 // ── Tabs ──────────────────────────────────────────────────────
@@ -147,14 +171,16 @@ function openBookingDetail(id) {
   linkEl.href   = joinUrl;
   linkEl.textContent = '🔗 ' + joinUrl;
 
-  // Action buttons
+  // Action buttons — based on role
   const actionsEl = document.getElementById('bd-actions');
   actionsEl.innerHTML = '';
   if (a.status === 'confirmed') {
-    actionsEl.innerHTML = `
-      <button class="btn-primary" onclick="startSessionFromModal('${a.id}')">🎥 بدء الاستشارة</button>
-      <button class="btn-sm btn-sm-success" onclick="markCompletedFromModal('${a.id}')">✅ تحديد كمكتملة</button>
-      <button class="btn-sm btn-sm-danger"  onclick="openCancelModal('${a.id}')">❌ إلغاء الحجز</button>`;
+    actionsEl.innerHTML = `<button class="btn-primary" onclick="startSessionFromModal('${a.id}')">🎥 بدء الاستشارة</button>`;
+    if (isAdmin()) {
+      actionsEl.innerHTML += `
+        <button class="btn-sm btn-sm-success" onclick="markCompletedFromModal('${a.id}')">✅ تحديد كمكتملة</button>
+        <button class="btn-sm btn-sm-danger"  onclick="openCancelModal('${a.id}')">❌ إلغاء الحجز</button>`;
+    }
   } else if (a.status === 'completed') {
     actionsEl.innerHTML = `<button class="btn-primary" onclick="startSessionFromModal('${a.id}')">🎥 إعادة فتح الغرفة</button>`;
   }
@@ -285,10 +311,14 @@ async function loadUsers() {
     const users = await res.json();
     const container = document.getElementById('usersList');
     if (!users.length) { container.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px">لا يوجد مستخدمون مضافون بعد</div>'; return; }
-    let html = `<table class="appointments-table"><thead><tr><th>اسم المستخدم</th><th>تاريخ الإضافة</th><th>الإجراءات</th></tr></thead><tbody>`;
+    let html = `<table class="appointments-table"><thead><tr><th>اسم المستخدم</th><th>الدور</th><th>تاريخ الإضافة</th><th>الإجراءات</th></tr></thead><tbody>`;
     users.forEach(u => {
+      const roleBadge = u.role === 'administrator'
+        ? '<span style="background:#1a3a6b;color:#fff;padding:3px 10px;border-radius:12px;font-size:12px">🛡️ مدير</span>'
+        : '<span style="background:#2c5f2d;color:#fff;padding:3px 10px;border-radius:12px;font-size:12px">⚖️ محامي</span>';
       html += `<tr>
         <td><strong>👤 ${u.username}</strong></td>
+        <td>${roleBadge}</td>
         <td>${u.created_at ? formatDateTime(u.created_at) : '—'}</td>
         <td><button class="btn-sm btn-sm-danger" onclick="deleteUser('${u.id}','${u.username}')">🗑️ حذف</button></td>
       </tr>`;
@@ -304,12 +334,14 @@ async function addUser() {
   const alertEl  = document.getElementById('usersAlert');
   if (!username||!password) { showSettingsAlert(alertEl, 'اسم المستخدم وكلمة المرور مطلوبان', 'danger'); return; }
   try {
-    const res  = await fetch('/api/admin/users', { method:'POST', headers:{ 'Content-Type':'application/json', 'x-admin-token': adminToken }, body: JSON.stringify({ username, password }) });
+    const role = document.getElementById('newUserRole').value;
+    const res  = await fetch('/api/admin/users', { method:'POST', headers:{ 'Content-Type':'application/json', 'x-admin-token': adminToken }, body: JSON.stringify({ username, password, role }) });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error);
     showSettingsAlert(alertEl, `✅ تم إضافة المستخدم "${username}" بنجاح`, 'success');
     document.getElementById('newUsername').value = '';
     document.getElementById('newUserPass').value = '';
+    document.getElementById('newUserRole').value = 'lawyer';
     loadUsers();
   } catch(e) { showSettingsAlert(alertEl, e.message, 'danger'); }
 }
