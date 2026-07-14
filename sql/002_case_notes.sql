@@ -3,7 +3,7 @@
 
 create table if not exists case_notes (
   id             uuid primary key default gen_random_uuid(),
-  appointment_id uuid not null references appointments(id) on delete cascade,
+  appointment_id text not null references appointments(id) on delete cascade,
   author_name    text not null,
   note           text not null,
   created_at     timestamptz not null default now()
