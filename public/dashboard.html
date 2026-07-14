@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-en="My Account — Legal Consultations Office">حسابي — مكتب الاستشارات القانونية</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script>
+    (function(){var l=localStorage.getItem('lang')||'ar';document.documentElement.dir=l==='en'?'ltr':'rtl';document.documentElement.lang=l==='en'?'en':'ar';})();
+  </script>
+</head>
+<body class="admin-body">
+
+<div class="admin-layout">
+
+  <aside class="admin-sidebar">
+    <div class="sidebar-brand">
+      <div class="logo-icon">⚖️</div>
+      <h3 data-en="Legal Consultations Office">مكتب الاستشارات القانونية</h3>
+      <p id="sidebarClientName" data-en="My Account">حسابي</p>
+    </div>
+    <ul class="sidebar-nav">
+      <li><a href="#" class="active" onclick="showTab('appointments',this)"><span class="nav-icon">📅</span> <span data-en="My Consultations">حجوزاتي</span></a></li>
+      <li><a href="#" onclick="showTab('profile',this)"><span class="nav-icon">👤</span> <span data-en="My Profile">ملفي الشخصي</span></a></li>
+      <li><a href="/booking.html"><span class="nav-icon">➕</span> <span data-en="Book New Consultation">حجز استشارة جديدة</span></a></li>
+    </ul>
+    <div class="sidebar-logout">
+      <ul class="sidebar-nav">
+        <li><a href="#" onclick="clientLogout()"><span class="nav-icon">🚪</span> <span data-en="Logout">تسجيل الخروج</span></a></li>
+      </ul>
+    </div>
+  </aside>
+
+  <main class="admin-main">
+
+    <!-- My Consultations -->
+    <div class="tab-content active" id="tab-appointments">
+      <div class="admin-topbar">
+        <div><h1 data-en="My Consultations 📅">حجوزاتي 📅</h1><p data-en="Your upcoming and past consultations">استشاراتك القادمة والسابقة</p></div>
+        <button class="btn-primary" onclick="loadMyAppointments()" style="padding:10px 20px;font-size:14px">🔄 <span data-en="Refresh">تحديث</span></button>
+      </div>
+      <div class="admin-card">
+        <div class="admin-card-header"><h3 data-en="My Bookings">قائمة الحجوزات</h3></div>
+        <div class="admin-card-body" style="padding:0;overflow-x:auto">
+          <div id="myAppointmentsTable"><div style="padding:40px;text-align:center;color:var(--text-muted)" data-en="Loading...">جارٍ التحميل...</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile -->
+    <div class="tab-content" id="tab-profile">
+      <div class="admin-topbar"><div><h1 data-en="My Profile 👤">ملفي الشخصي 👤</h1></div></div>
+      <div class="admin-card">
+        <div class="admin-card-body">
+          <div class="form-group"><label data-en="Full Name">الاسم الكامل</label><div id="profileName" style="padding:12px 0;font-weight:600">—</div></div>
+          <div class="form-group"><label data-en="Email">البريد الإلكتروني</label><div id="profileEmail" style="padding:12px 0;font-weight:600">—</div></div>
+          <div class="form-group"><label data-en="Phone">رقم الهاتف</label><div id="profilePhone" style="padding:12px 0;font-weight:600">—</div></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="/js/lang.js"></script>
+<script src="/js/client-auth.js"></script>
+<script src="/js/dashboard.js"></script>
+</body>
+</html>

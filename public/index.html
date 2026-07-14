@@ -58,6 +58,8 @@
       <li><a href="#how" data-en="📋 How It Works">📋 كيف يعمل</a></li>
       <li><a href="#about" data-en="🏛️ About Us">🏛️ عن المكتب</a></li>
       <li><a href="/booking.html" class="btn-book-nav" data-en="📅 Book Now">📅 احجز استشارة</a></li>
+      <li id="navGuestLink"><a href="/account.html" data-en="🔐 Login">🔐 تسجيل الدخول</a></li>
+      <li id="navClientLink" class="hidden"><a href="/dashboard.html" data-en="👤 My Account">👤 حسابي</a></li>
     </ul>
     <button id="langToggle" class="lang-btn" onclick="toggleLang()">🌐 English</button>
   </nav>
@@ -346,6 +348,7 @@
 </footer>
 
 <script src="/js/lang.js"></script>
+<script src="/js/client-auth.js"></script>
 <script>
 async function joinConsultation() {
   const code = document.getElementById('joinCode').value.trim();

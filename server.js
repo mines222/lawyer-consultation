@@ -26,6 +26,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 const loginLimiter   = rateLimit({ windowMs: 15*60*1000, max: 10, message: { error: 'محاولات كثيرة، حاول بعد 15 دقيقة' }, standardHeaders: true, legacyHeaders: false });
 const bookingLimiter = rateLimit({ windowMs: 60*1000, max: 5, message: { error: 'طلبات كثيرة، حاول بعد قليل' } });
 const tokenLimiter   = rateLimit({ windowMs: 60*1000, max: 20, message: { error: 'طلبات كثيرة' } });
+const clientAuthLimiter = rateLimit({ windowMs: 15*60*1000, max: 10, message: { error: 'محاولات كثيرة، حاول بعد 15 دقيقة' }, standardHeaders: true, legacyHeaders: false });
 
 // ── Environment ───────────────────────────────────────────────
 const APP_ID         = process.env.JAAS_APP_ID;
@@ -56,6 +57,7 @@ function verifyPassword(password, stored) {
 const VALID_TYPES    = ['audio', 'video'];
 const VALID_STATUSES = ['confirmed', 'completed', 'cancelled'];
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 function isValidUUID(v) { return UUID_RE.test(v); }
 function sanitizeError(e) { console.error(e); return 'حدث خطأ في السيرفر'; }
 
@@ -77,7 +79,22 @@ function adminAuth(req, res, next) {
   const token = req.headers['x-admin-token'];
   if (!token) return res.status(401).json({ error: 'غير مصرح' });
   try {
-    req.adminUser = jwt.verify(token, SESSION_SECRET);
+    const payload = jwt.verify(token, SESSION_SECRET);
+    if (payload.type !== 'admin') throw new Error('wrong token type');
+    req.adminUser = payload;
+    next();
+  } catch {
+    res.status(401).json({ error: 'الجلسة منتهية، سجل الدخول مجدداً' });
+  }
+}
+// client (customer) session — separate header + token type from adminAuth
+function clientAuth(req, res, next) {
+  const token = req.headers['x-client-token'];
+  if (!token) return res.status(401).json({ error: 'يجب تسجيل الدخول' });
+  try {
+    const payload = jwt.verify(token, SESSION_SECRET);
+    if (payload.type !== 'client') throw new Error('wrong token type');
+    req.client = payload;
     next();
   } catch {
     res.status(401).json({ error: 'الجلسة منتهية، سجل الدخول مجدداً' });
@@ -114,12 +131,26 @@ app.post('/api/book', bookingLimiter, async (req, res) => {
   if (!VALID_TYPES.includes(type)) return res.status(400).json({ error: 'نوع الاستشارة غير صحيح' });
   if (!slotId || typeof slotId !== 'string' || slotId.length > 100) return res.status(400).json({ error: 'معرف الموعد غير صحيح' });
   if (name.length > 100 || phone.length > 20 || email.length > 100) return res.status(400).json({ error: 'البيانات المدخلة طويلة جداً' });
+
+  // Optional: link the booking to a logged-in client account. A missing/invalid/expired
+  // token must never block a booking — it silently falls back to an anonymous booking.
+  let clientId = null;
+  const clientToken = req.headers['x-client-token'];
+  if (clientToken) {
+    try {
+      const payload = jwt.verify(clientToken, SESSION_SECRET);
+      if (payload.type === 'client') clientId = payload.clientId;
+    } catch {}
+  }
+
   try {
     const { data: slot, error: slotErr } = await supabase.from('available_slots').select('*').eq('id', slotId).eq('available', true).single();
     if (slotErr || !slot) return res.status(400).json({ error: 'الموعد غير متاح' });
     const roomName = uuidv4().replace(/-/g, '').substring(0, 16);
     const id = uuidv4();
-    const { error: insertErr } = await supabase.from('appointments').insert({ id, name, phone, email, type, slot_id: slotId, date: slot.date, time: slot.time, status: 'confirmed', room_name: roomName });
+    const insertObj = { id, name, phone, email, type, slot_id: slotId, date: slot.date, time: slot.time, status: 'confirmed', room_name: roomName };
+    if (clientId) insertObj.client_id = clientId;
+    const { error: insertErr } = await supabase.from('appointments').insert(insertObj);
     if (insertErr) throw insertErr;
     await supabase.from('available_slots').update({ available: false }).eq('id', slotId);
     res.json({ success: true, appointmentId: id, date: slot.date, time: slot.time, message: 'تم الحجز بنجاح' });
@@ -139,6 +170,57 @@ app.post('/api/token', tokenLimiter, async (req, res) => {
 });
 
 // ════════════════════════════════════════════════════════════════
+// CLIENT AUTH
+// ════════════════════════════════════════════════════════════════
+
+app.post('/api/client/register', clientAuthLimiter, async (req, res) => {
+  let { name, email, password, phone } = req.body;
+  if (!name || !email || !password || !phone) return res.status(400).json({ error: 'جميع الحقول مطلوبة' });
+  email = email.trim().toLowerCase();
+  if (!EMAIL_RE.test(email) || email.length > 100) return res.status(400).json({ error: 'البريد الإلكتروني غير صحيح' });
+  if (name.length > 100 || phone.length > 20) return res.status(400).json({ error: 'البيانات المدخلة طويلة جداً' });
+  if (password.length < 6) return res.status(400).json({ error: 'كلمة المرور 6 أحرف على الأقل' });
+  try {
+    const { data: existing } = await supabase.from('clients').select('id').eq('email', email).single();
+    if (existing) return res.status(400).json({ error: 'البريد الإلكتروني مستخدم بالفعل' });
+    const id = uuidv4();
+    const password_hash = hashPassword(password);
+    const { error } = await supabase.from('clients').insert({ id, name, email, phone, password_hash });
+    if (error) throw error;
+    const token = jwt.sign({ type: 'client', clientId: id, email, name }, SESSION_SECRET, { expiresIn: '30d' });
+    res.json({ success: true, token, client: { id, name, email, phone } });
+  } catch (e) { res.status(500).json({ error: sanitizeError(e) }); }
+});
+
+app.post('/api/client/login', clientAuthLimiter, async (req, res) => {
+  let { email, password } = req.body;
+  if (!email || !password) return res.status(400).json({ error: 'البريد الإلكتروني وكلمة المرور مطلوبان' });
+  email = email.trim().toLowerCase();
+  try {
+    const { data: client } = await supabase.from('clients').select('*').eq('email', email).single();
+    if (!client || !verifyPassword(password, client.password_hash)) return res.status(401).json({ error: 'البريد الإلكتروني أو كلمة المرور غير صحيحة' });
+    const token = jwt.sign({ type: 'client', clientId: client.id, email: client.email, name: client.name }, SESSION_SECRET, { expiresIn: '30d' });
+    res.json({ success: true, token, client: { id: client.id, name: client.name, email: client.email, phone: client.phone } });
+  } catch (e) { res.status(500).json({ error: sanitizeError(e) }); }
+});
+
+app.get('/api/client/me', clientAuth, async (req, res) => {
+  try {
+    const { data: client, error } = await supabase.from('clients').select('id,name,email,phone,created_at').eq('id', req.client.clientId).single();
+    if (error || !client) return res.status(404).json({ error: 'الحساب غير موجود' });
+    res.json({ id: client.id, name: client.name, email: client.email, phone: client.phone, createdAt: client.created_at });
+  } catch (e) { res.status(500).json({ error: sanitizeError(e) }); }
+});
+
+app.get('/api/client/appointments', clientAuth, async (req, res) => {
+  try {
+    const { data, error } = await supabase.from('appointments').select('*').eq('client_id', req.client.clientId).order('date', { ascending: false }).order('time', { ascending: false });
+    if (error) throw error;
+    res.json(data.map(a => ({ id: a.id, name: a.name, phone: a.phone, email: a.email, type: a.type, slotId: a.slot_id, date: a.date, time: a.time, status: a.status, roomName: a.room_name, createdAt: a.created_at })));
+  } catch (e) { res.status(500).json({ error: sanitizeError(e) }); }
+});
+
+// ════════════════════════════════════════════════════════════════
 // ADMIN AUTH
 // ════════════════════════════════════════════════════════════════
 
@@ -148,7 +230,7 @@ app.post('/api/admin/login', loginLimiter, async (req, res) => {
 
   // 1) Check master admin (env var)
   if ((!username || username === 'master' || username === 'admin') && password === MASTER_PASSWORD) {
-    const token = jwt.sign({ role: 'administrator', master: true, username: 'master' }, SESSION_SECRET, { expiresIn: '8h' });
+    const token = jwt.sign({ type: 'admin', role: 'administrator', master: true, username: 'master' }, SESSION_SECRET, { expiresIn: '8h' });
     return res.json({ success: true, token, master: true, role: 'administrator' });
   }
 
@@ -157,7 +239,7 @@ app.post('/api/admin/login', loginLimiter, async (req, res) => {
     try {
       const { data: user } = await supabase.from('admin_users').select('*').eq('username', username).single();
       if (user && verifyPassword(password, user.password_hash)) {
-        const token = jwt.sign({ role: user.role, master: false, username: user.username, userId: user.id }, SESSION_SECRET, { expiresIn: '8h' });
+        const token = jwt.sign({ type: 'admin', role: user.role, master: false, username: user.username, userId: user.id }, SESSION_SECRET, { expiresIn: '8h' });
         return res.json({ success: true, token, master: false, role: user.role });
       }
     } catch {}

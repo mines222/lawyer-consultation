@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-en="My Account — Legal Consultations Office">حسابي — مكتب الاستشارات القانونية</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script>
+    (function(){var l=localStorage.getItem('lang')||'ar';document.documentElement.dir=l==='en'?'ltr':'rtl';document.documentElement.lang=l==='en'?'en':'ar';})();
+  </script>
+</head>
+<body class="admin-body">
+
+<div class="admin-login">
+  <div class="login-card">
+    <div class="logo">⚖️</div>
+
+    <!-- Login Form -->
+    <div id="loginForm">
+      <h2 data-en="Client Login">تسجيل دخول العميل</h2>
+      <p data-en="Log in to view your consultation history">سجّل الدخول لعرض تاريخ استشاراتك</p>
+      <div class="form-group">
+        <label data-en="Email">البريد الإلكتروني</label>
+        <input type="email" id="loginEmail" placeholder="example@email.com" onkeydown="if(event.key==='Enter') clientLogin()">
+      </div>
+      <div class="form-group">
+        <label data-en="Password">كلمة المرور</label>
+        <input type="password" id="loginPassword" placeholder="••••••••" onkeydown="if(event.key==='Enter') clientLogin()">
+      </div>
+      <div id="loginErrorMsg" class="error-msg"></div>
+      <button class="btn-submit" onclick="clientLogin()">🔐 <span data-en="Login">دخول</span></button>
+      <p style="margin-top:18px;font-size:13px">
+        <span data-en="Don't have an account?">ليس لديك حساب؟</span>
+        <a href="#" onclick="document.getElementById('loginForm').classList.add('hidden');document.getElementById('registerForm').classList.remove('hidden');return false;" data-en="Register now">سجّل الآن</a>
+      </p>
+    </div>
+
+    <!-- Register Form -->
+    <div id="registerForm" class="hidden">
+      <h2 data-en="Create Account">إنشاء حساب جديد</h2>
+      <p data-en="Create an account to track your consultations">أنشئ حساباً لمتابعة استشاراتك</p>
+      <div class="form-group">
+        <label data-en="Full Name">الاسم الكامل</label>
+        <input type="text" id="regName" placeholder="أحمد محمد" data-en-placeholder="Ahmed Mohammed">
+      </div>
+      <div class="form-group">
+        <label data-en="Email">البريد الإلكتروني</label>
+        <input type="email" id="regEmail" placeholder="example@email.com">
+      </div>
+      <div class="form-group">
+        <label data-en="Phone">رقم الهاتف</label>
+        <input type="tel" id="regPhone" placeholder="+971 50 000 0000">
+      </div>
+      <div class="form-group">
+        <label data-en="Password">كلمة المرور</label>
+        <input type="password" id="regPassword" placeholder="••••••••">
+      </div>
+      <div class="form-group">
+        <label data-en="Confirm Password">تأكيد كلمة المرور</label>
+        <input type="password" id="regPasswordConfirm" placeholder="••••••••" onkeydown="if(event.key==='Enter') clientRegister()">
+      </div>
+      <div id="regErrorMsg" class="error-msg"></div>
+      <button class="btn-submit" onclick="clientRegister()">✅ <span data-en="Create Account">إنشاء الحساب</span></button>
+      <p style="margin-top:18px;font-size:13px">
+        <span data-en="Already have an account?">لديك حساب بالفعل؟</span>
+        <a href="#" onclick="document.getElementById('registerForm').classList.add('hidden');document.getElementById('loginForm').classList.remove('hidden');return false;" data-en="Log in">سجّل الدخول</a>
+      </p>
+    </div>
+
+    <p style="margin-top:24px;font-size:13px"><a href="/index.html" data-en="← Back to home">← العودة للرئيسية</a></p>
+  </div>
+</div>
+
+<script src="/js/lang.js"></script>
+<script src="/js/client-auth.js"></script>
+</body>
+</html>

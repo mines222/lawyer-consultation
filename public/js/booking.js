@@ -124,7 +124,7 @@ async function submitBooking() {
   try {
     const res = await fetch('/api/book', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...(typeof getClientAuthHeaders === 'function' ? getClientAuthHeaders() : {}) },
       body: JSON.stringify({
         name: document.getElementById('clientName').value.trim(),
         phone: document.getElementById('clientPhone').value.trim(),
@@ -146,3 +146,16 @@ async function submitBooking() {
     txt.textContent = '✅ تأكيد الحجز';
   }
 }
+
+// ── Prefill from logged-in client account (best-effort; never blocks guest booking) ──
+async function prefillFromClient() {
+  try {
+    const res = await fetch('/api/client/me', { headers: getClientAuthHeaders() });
+    if (!res.ok) return;
+    const c = await res.json();
+    document.getElementById('clientName').value  = c.name;
+    document.getElementById('clientPhone').value = c.phone || '';
+    document.getElementById('clientEmail').value = c.email;
+  } catch {}
+}
+if (typeof isClientLoggedIn === 'function' && isClientLoggedIn()) prefillFromClient();
