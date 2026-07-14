@@ -258,7 +258,7 @@ app.get('/api/admin/appointments', adminAuth, async (req, res) => {
   try {
     const { data, error } = await supabase.from('appointments').select('*').order('created_at', { ascending: false });
     if (error) throw error;
-    res.json(data.map(a => ({ id: a.id, name: a.name, phone: a.phone, email: a.email, type: a.type, slotId: a.slot_id, date: a.date, time: a.time, status: a.status, roomName: a.room_name, createdAt: a.created_at })));
+    res.json(data.map(a => ({ id: a.id, name: a.name, phone: a.phone, email: a.email, type: a.type, slotId: a.slot_id, date: a.date, time: a.time, status: a.status, roomName: a.room_name, createdAt: a.created_at, clientId: a.client_id })));
   } catch (e) { res.status(500).json({ error: sanitizeError(e) }); }
 });
 
@@ -281,6 +281,60 @@ app.delete('/api/admin/appointments/:id', adminAuth, adminOnly, async (req, res)
     await supabase.from('appointments').update({ status: 'cancelled' }).eq('id', req.params.id);
     if (appt?.slot_id) await supabase.from('available_slots').update({ available: true }).eq('id', appt.slot_id);
     res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: sanitizeError(e) }); }
+});
+
+// ════════════════════════════════════════════════════════════════
+// ADMIN — CASE NOTES
+// ════════════════════════════════════════════════════════════════
+
+app.get('/api/admin/appointments/:id/notes', adminAuth, async (req, res) => {
+  if (!isValidUUID(req.params.id)) return res.status(400).json({ error: 'معرف غير صحيح' });
+  try {
+    const { data, error } = await supabase.from('case_notes').select('*').eq('appointment_id', req.params.id).order('created_at', { ascending: true });
+    if (error) throw error;
+    res.json(data.map(n => ({ id: n.id, appointmentId: n.appointment_id, authorName: n.author_name, note: n.note, createdAt: n.created_at })));
+  } catch (e) { res.status(500).json({ error: sanitizeError(e) }); }
+});
+
+app.post('/api/admin/appointments/:id/notes', adminAuth, async (req, res) => {
+  if (!isValidUUID(req.params.id)) return res.status(400).json({ error: 'معرف غير صحيح' });
+  const { note } = req.body;
+  if (!note || !note.trim()) return res.status(400).json({ error: 'نص الملاحظة مطلوب' });
+  if (note.length > 2000) return res.status(400).json({ error: 'الملاحظة طويلة جداً' });
+  try {
+    const { data: appt } = await supabase.from('appointments').select('id').eq('id', req.params.id).single();
+    if (!appt) return res.status(404).json({ error: 'الحجز غير موجود' });
+    const insertObj = { appointment_id: req.params.id, author_name: req.adminUser.username, note: note.trim() };
+    const { data, error } = await supabase.from('case_notes').insert(insertObj).select().single();
+    if (error) throw error;
+    res.json({ id: data.id, appointmentId: data.appointment_id, authorName: data.author_name, note: data.note, createdAt: data.created_at });
+  } catch (e) { res.status(500).json({ error: sanitizeError(e) }); }
+});
+
+// ════════════════════════════════════════════════════════════════
+// ADMIN — CLIENTS
+// ════════════════════════════════════════════════════════════════
+
+app.get('/api/admin/clients', adminAuth, adminOnly, async (req, res) => {
+  try {
+    const { data, error } = await supabase.from('clients').select('id,name,email,phone,created_at').order('created_at', { ascending: false });
+    if (error) throw error;
+    res.json(data.map(c => ({ id: c.id, name: c.name, email: c.email, phone: c.phone, createdAt: c.created_at })));
+  } catch (e) { res.status(500).json({ error: sanitizeError(e) }); }
+});
+
+app.get('/api/admin/clients/:id/appointments', adminAuth, adminOnly, async (req, res) => {
+  if (!isValidUUID(req.params.id)) return res.status(400).json({ error: 'معرف غير صحيح' });
+  try {
+    const { data: client, error: clientErr } = await supabase.from('clients').select('id,name,email,phone,created_at').eq('id', req.params.id).single();
+    if (clientErr || !client) return res.status(404).json({ error: 'العميل غير موجود' });
+    const { data, error } = await supabase.from('appointments').select('*').eq('client_id', req.params.id).order('date', { ascending: false }).order('time', { ascending: false });
+    if (error) throw error;
+    res.json({
+      client: { id: client.id, name: client.name, email: client.email, phone: client.phone, createdAt: client.created_at },
+      appointments: data.map(a => ({ id: a.id, name: a.name, phone: a.phone, email: a.email, type: a.type, slotId: a.slot_id, date: a.date, time: a.time, status: a.status, roomName: a.room_name, createdAt: a.created_at }))
+    });
   } catch (e) { res.status(500).json({ error: sanitizeError(e) }); }
 });
 

@@ -2,6 +2,7 @@ let adminToken  = localStorage.getItem('adminToken');
 let isMaster    = localStorage.getItem('adminMaster') === 'true';
 let adminRole   = localStorage.getItem('adminRole') || 'lawyer'; // lawyer | administrator
 let allAppointments = [];
+let allClients = [];
 let cancelTargetId  = null;
 let currentBookingId = null;
 
@@ -96,6 +97,8 @@ function showTab(name, el) {
   if (name === 'appointments') loadAppointments();
   if (name === 'slots')        loadSlots();
   if (name === 'settings' && isMaster) loadUsers();
+  if (name === 'clients')      loadClients();
+  if (name === 'reports')      loadAppointments().then(computeReports);
 }
 
 function loadAll() { loadAppointments(); loadSlots(); }
@@ -149,6 +152,109 @@ function filterAppointments() {
   renderAppointments(filtered, 'appointmentsTable');
 }
 
+// ── Clients ───────────────────────────────────────────────────
+async function loadClients() {
+  try {
+    const res = await fetch('/api/admin/clients', { headers:{ 'x-admin-token': adminToken } });
+    if (res.status === 401) return handleUnauth();
+    allClients = await res.json();
+    renderClients(allClients);
+  } catch {
+    document.getElementById('clientsTable').innerHTML = '<div style="padding:24px;text-align:center;color:var(--danger)">⚠️ تعذر تحميل البيانات</div>';
+  }
+}
+
+function renderClients(list) {
+  const container = document.getElementById('clientsTable');
+  if (!list || !list.length) {
+    container.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-muted)">📭 لا يوجد عملاء مسجلون بعد</div>';
+    return;
+  }
+  let html = `<table class="appointments-table">
+    <thead><tr><th>الاسم</th><th>البريد الإلكتروني</th><th>الهاتف</th><th>تاريخ التسجيل</th></tr></thead><tbody>`;
+  list.forEach(c => {
+    html += `<tr class="appt-row" onclick="openClientDetail('${c.id}')" title="اضغط لعرض السجل">
+      <td><strong>${c.name}</strong></td>
+      <td>${c.email}</td>
+      <td>${c.phone || '—'}</td>
+      <td>${c.createdAt ? formatDateTime(c.createdAt) : '—'}</td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  container.innerHTML = html;
+}
+
+function filterClientsSearch() {
+  const q = document.getElementById('clientSearch').value.trim().toLowerCase();
+  const filtered = q ? allClients.filter(c => c.name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q)) : allClients;
+  renderClients(filtered);
+}
+
+async function openClientDetail(id) {
+  try {
+    const res  = await fetch(`/api/admin/clients/${id}/appointments`, { headers:{ 'x-admin-token': adminToken } });
+    if (res.status === 401) return handleUnauth();
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    document.getElementById('cd-name').textContent    = data.client.name;
+    document.getElementById('cd-email').textContent   = data.client.email;
+    document.getElementById('cd-phone').textContent   = data.client.phone || '—';
+    document.getElementById('cd-created').textContent = data.client.createdAt ? formatDateTime(data.client.createdAt) : '—';
+    renderAppointments(data.appointments, 'clientApptsTable');
+    document.getElementById('clientModal').classList.add('show');
+  } catch(e) { alert('خطأ: ' + e.message); }
+}
+
+// ── Reports ───────────────────────────────────────────────────
+function computeReports() {
+  const total = allAppointments.length;
+  const pct = (n) => total ? Math.round(n / total * 100) : 0;
+  const confirmed  = allAppointments.filter(a => a.status === 'confirmed').length;
+  const completed  = allAppointments.filter(a => a.status === 'completed').length;
+  const cancelled  = allAppointments.filter(a => a.status === 'cancelled').length;
+  const audio      = allAppointments.filter(a => a.type === 'audio').length;
+  const video      = allAppointments.filter(a => a.type === 'video').length;
+  const registered = allAppointments.filter(a => a.clientId).length;
+  const guest      = total - registered;
+
+  document.getElementById('repTotal').textContent          = total;
+  document.getElementById('repCompletionRate').textContent = pct(completed) + '%';
+  document.getElementById('repCancelRate').textContent     = pct(cancelled) + '%';
+  document.getElementById('repRegisteredPct').textContent  = pct(registered) + '%';
+  document.getElementById('repAudio').textContent      = audio;
+  document.getElementById('repVideo').textContent      = video;
+  document.getElementById('repConfirmed').textContent  = confirmed;
+  document.getElementById('repCompleted').textContent  = completed;
+  document.getElementById('repCancelled').textContent  = cancelled;
+  document.getElementById('repRegistered').textContent = registered;
+  document.getElementById('repGuest').textContent      = guest;
+}
+
+// ── CSV Export ────────────────────────────────────────────────
+function exportAppointmentsCSV() {
+  const headers = ['الاسم','الهاتف','البريد الإلكتروني','نوع الاستشارة','التاريخ','الوقت','الحالة','نوع العميل','تاريخ التسجيل'];
+  const csvEscape = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  const rows = allAppointments.map(a => [
+    a.name, a.phone, a.email,
+    a.type === 'video' ? 'صوت وصورة' : 'صوت فقط',
+    a.date, a.time,
+    { confirmed:'مؤكدة', completed:'مكتملة', cancelled:'ملغية' }[a.status] || a.status,
+    a.clientId ? 'مسجل' : 'ضيف',
+    a.createdAt ? formatDateTime(a.createdAt) : ''
+  ].map(csvEscape).join(','));
+  const csv = [headers.map(csvEscape).join(','), ...rows].join('\r\n');
+
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `appointments_${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 // ── Booking Detail Popup ──────────────────────────────────────
 function openBookingDetail(id) {
   const a = allAppointments.find(x => x.id === id);
@@ -186,6 +292,7 @@ function openBookingDetail(id) {
   }
 
   document.getElementById('bookingModal').classList.add('show');
+  loadNotesForAppointment(id);
 }
 
 function copyCode() {
@@ -209,6 +316,45 @@ async function markCompletedFromModal(id) {
   await fetch(`/api/admin/appointments/${id}`, { method:'PUT', headers:{ 'Content-Type':'application/json', 'x-admin-token': adminToken }, body: JSON.stringify({ status:'completed' }) });
   closeModal('bookingModal');
   loadAppointments();
+}
+
+// ── Case Notes (wired into Booking Detail Popup) ───────────────
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+async function loadNotesForAppointment(id) {
+  try {
+    const res   = await fetch(`/api/admin/appointments/${id}/notes`, { headers:{ 'x-admin-token': adminToken } });
+    const notes = await res.json();
+    renderNotes(notes);
+  } catch { document.getElementById('bd-notesList').innerHTML = '<div style="color:var(--danger);font-size:13px">تعذر تحميل الملاحظات</div>'; }
+}
+
+function renderNotes(notes) {
+  const container = document.getElementById('bd-notesList');
+  if (!notes || !notes.length) {
+    container.innerHTML = '<div style="color:var(--text-muted);font-size:13px">لا توجد ملاحظات بعد</div>';
+    return;
+  }
+  container.innerHTML = notes.map(n => `
+    <div style="background:var(--cream);border-radius:8px;padding:10px 14px">
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px">👤 ${escapeHtml(n.authorName)} — ${formatDateTime(n.createdAt)}</div>
+      <div style="white-space:pre-wrap">${escapeHtml(n.note)}</div>
+    </div>`).join('');
+}
+
+async function addNote() {
+  const textEl = document.getElementById('bd-newNote');
+  const note   = textEl.value.trim();
+  if (!note || !currentBookingId) return;
+  try {
+    const res  = await fetch(`/api/admin/appointments/${currentBookingId}/notes`, { method:'POST', headers:{ 'Content-Type':'application/json', 'x-admin-token': adminToken }, body: JSON.stringify({ note }) });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    textEl.value = '';
+    loadNotesForAppointment(currentBookingId);
+  } catch(e) { alert('خطأ: ' + e.message); }
 }
 
 // ── Legacy helpers (keep for compatibility) ───────────────────
